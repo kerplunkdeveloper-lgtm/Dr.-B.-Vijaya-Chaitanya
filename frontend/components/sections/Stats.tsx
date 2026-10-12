@@ -31,7 +31,7 @@ export function Stats() {
       {/* live heartbeat trace running behind the numbers */}
       <EcgLine
         uid="stats-ecg"
-        className="pointer-events-none absolute inset-x-0 bottom-4 -z-10 h-[84px] w-full opacity-70 md:h-[104px]"
+        className="pointer-events-none absolute inset-x-0 bottom-4 -z-10 h-21 w-full opacity-70 md:h-26"
       />
 
       <div className="container-x">
@@ -42,7 +42,7 @@ export function Stats() {
           >
             A career measured in experience
           </h2>
-          <span aria-hidden className="mx-auto mt-5 block h-[2px] w-9 rounded-full bg-secondary" />
+          <span aria-hidden className="mx-auto mt-5 block h-0.5 w-9 rounded-full bg-secondary" />
         </Reveal>
 
         <dl className="mt-12 grid gap-y-2 lg:mt-16 lg:grid-cols-5 lg:gap-y-0 lg:divide-x lg:divide-white/10">
@@ -52,10 +52,10 @@ export function Stats() {
               delay={i * 70}
               className="flex items-baseline justify-between gap-6 border-b border-white/10 py-5 last:border-b-0 lg:flex-col lg:items-center lg:justify-start lg:gap-0 lg:border-b-0 lg:px-4 lg:py-3"
             >
-              <dd className="font-serif text-[clamp(2.1rem,3.6vw,3.6rem)] font-light leading-none tracking-[-0.035em] text-white [filter:drop-shadow(0_0_22px_rgba(141,211,206,0.32))]">
+              <dd className="font-serif text-[clamp(2.1rem,3.6vw,3.6rem)] font-light leading-none tracking-[-0.035em] text-white filter-[drop-shadow(0_0_22px_rgba(141,211,206,0.32))]">
                 <Odometer value={s.value} />
               </dd>
-              <span aria-hidden className="mt-5 hidden h-[2px] w-7 rounded-full bg-secondary lg:block" />
+              <span aria-hidden className="mt-5 hidden h-0.5 w-7 rounded-full bg-secondary lg:block" />
               <dt className="text-right text-[13px] font-light text-white/70 lg:mt-4 lg:text-center lg:text-[12.5px]">
                 {s.label}
               </dt>
@@ -63,9 +63,6 @@ export function Stats() {
           ))}
         </dl>
 
-        <p className="mt-14 text-center text-[11px] font-light text-white/45 lg:mt-16">
-          Documented procedural experience from professional profile.
-        </p>
       </div>
     </section>
   );

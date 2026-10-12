@@ -42,7 +42,7 @@ export const NAV = [
   { label: "Expertise", href: "#expertise", id: "expertise" },
   { label: "Experience", href: "#experience", id: "experience" },
   { label: "Journey", href: "#journey", id: "journey" },
-  { label: "Heart Health", href: "#heart-health", id: "heart-health" },
+  { label: "FAQ", href: "#faq", id: "faq" },
   { label: "Contact", href: "#contact", id: "contact" },
 ] as const;
 
@@ -106,18 +106,24 @@ export const JOURNEY = [
   {
     label: "Present",
     kind: "role",
-    title: "Managing Director, Medstar Hospitals",
-    details: ["Chief of Cardiovascular Sciences", "Interventional Cardiologist"],
+    title: "Healthcare Leadership",
+    details: ["Managing Director, Medstar Hospitals","Chief of Cardiovascular Sciences"],
   },
   {
-    label: "Fellowships",
-    kind: "fellowship",
-    title: "Fellowships & Advanced Training",
-    details: ["TAVI Fellowship, Medanta", "Mount Sinai, New York"],
+    label: "Career",
+    kind: "Career",
+    title: "Leading Institutions",
+    details: ["Consultant Cardiologist, Medanta Medicity Delhi NCR · Senior Consultant Cardiologist, Manipal Hospitals · Clinical experience at Jayadeva Institute of Cardiology, Bengaluru"],
   },
-  { label: "2013", kind: "degree", title: "DM – Cardiology", details: ["Sri Ramachandra Medical College"] },
-  { label: "2009", kind: "degree", title: "MD – General Medicine", details: ["Rajiv Gandhi University"] },
-  { label: "2005", kind: "degree", title: "MBBS", details: ["Rajiv Gandhi University"] },
+    {
+    label: "Advanced",
+    kind: "Advanced",
+    title: "Interventional & Structural Heart Training",
+    details: ["FIC · TAVI Fellowship, Medanta Delhi · Advanced training exposure at Mount Sinai, New York · FACC"],
+  },
+  { label: "2013", kind: "degree", title: "DM – Cardiology", details: ["Sri Ramachandra Medical College, Chennai"] },
+  { label: "2009", kind: "degree", title: "MD – General Medicine", details: ["Rajiv Gandhi University , Karnataka"] },
+  { label: "2005", kind: "degree", title: "MBBS", details: ["Rajiv Gandhi University, Karnataka"] },
 ] as const;
 
 export const AWARDS = [

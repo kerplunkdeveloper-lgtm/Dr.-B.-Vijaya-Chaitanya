@@ -1,5 +1,5 @@
+import Image from "next/image";
 import { AWARDS } from "@/lib/site";
-import { AwardsArt } from "../art/AwardsArt";
 import { ShieldCrossIcon, ShieldHeartIcon, ShieldIcon, ShieldStarIcon } from "../icons";
 import { Reveal } from "../Reveal";
 
@@ -34,10 +34,21 @@ export function Awards() {
             </h2>
           </div>
 
-          <Reveal className="relative aspect-[16/9] overflow-hidden rounded-[28px] shadow-[0_40px_70px_-44px_rgba(16,42,67,0.6)]">
+          <Reveal className="group relative aspect-[4/3] overflow-hidden rounded-[28px] border border-slate-200/90 bg-mist shadow-[0_40px_70px_-44px_rgba(16,42,67,0.5)]">
             <div data-g="parallax" data-speed="0.05" className="absolute inset-0">
-              <AwardsArt uid="awards" className="h-full w-full" />
+              <Image
+                src="/images/awards-trophy.jpg"
+                alt="Excellence in Interventional Cardiology - Dr. B. Vijaya Chaitanya"
+                fill
+                sizes="(max-width: 1024px) 100vw, 55vw"
+                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                priority={false}
+              />
             </div>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-linear-to-t from-navy/40 to-transparent"
+            />
           </Reveal>
         </div>
 

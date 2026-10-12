@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Poppins } from "next/font/google";
+import { Poppins, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import { DESCRIPTION, SITE } from "@/lib/site";
 import "./globals.css";
@@ -9,6 +9,14 @@ const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -90,7 +98,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <style>{"#preloader{display:none!important}html{overflow:auto!important}"}</style>
         </noscript>
       </head>
-      <body className={`${poppins.className} min-h-dvh`}>
+      <body className={`${poppins.className} min-h-dvh`} suppressHydrationWarning>
         {/* Flags that JS-driven motion is available; Motion.tsx sets g-ready once it takes over. */}
         <Script
           id="boot-flags"
@@ -103,7 +111,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Preloader />
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-ink focus:px-5 focus:py-3 focus:text-sm focus:text-white"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-full focus:bg-ink focus:px-5 focus:py-3 focus:text-sm focus:text-white"
         >
           Skip to content
         </a>

@@ -152,15 +152,18 @@ const RAU_ELLIPSE = makeEllipsoid(-0.26, 0.4, 0.26, 0.14, 0.12, 0.1, 0.2);
 
 // Precomputed vessel segments
 const AORTA_SEGS = makeSegments([
-  [0.06, 0.36, -0.02, 0.105],
-  [0.07, 0.62, -0.04, 0.1],
-  [0.15, 0.81, -0.06, 0.095],
-  [0.3, 0.88, -0.08, 0.09],
-  [0.42, 0.76, -0.1, 0.085],
-  [0.45, 0.52, -0.14, 0.08],
+  [0.06, 0.36, -0.02, 0.108],
+  [0.07, 0.62, -0.04, 0.102],
+  [0.15, 0.81, -0.06, 0.098],
+  [0.3, 0.88, -0.08, 0.092],
+  [0.42, 0.76, -0.1, 0.086],
+  [0.45, 0.52, -0.14, 0.082],
 ]);
-const ARCH_A_SEGS = makeSegments([[0.17, 0.85, -0.06, 0.045], [0.17, 1.0, -0.06, 0.038]]);
-const ARCH_B_SEGS = makeSegments([[0.29, 0.88, -0.08, 0.04], [0.32, 1.01, -0.09, 0.033]]);
+// 3 Aortic Arch Branches (Brachiocephalic, Left Common Carotid, Left Subclavian)
+const ARCH_A_SEGS = makeSegments([[0.13, 0.84, -0.05, 0.046], [0.11, 1.06, -0.05, 0.038]]);
+const ARCH_B_SEGS = makeSegments([[0.24, 0.88, -0.07, 0.042], [0.25, 1.07, -0.08, 0.035]]);
+const ARCH_C_SEGS = makeSegments([[0.34, 0.86, -0.09, 0.040], [0.37, 1.05, -0.11, 0.033]]);
+
 const PULM_TRUNK_SEGS = makeSegments([
   [-0.1, 0.36, 0.14, 0.088],
   [-0.14, 0.6, 0.15, 0.082],
@@ -168,12 +171,15 @@ const PULM_TRUNK_SEGS = makeSegments([
 ]);
 const PULM_RIGHT_SEGS = makeSegments([[-0.26, 0.77, 0.12, 0.072], [-0.58, 0.8, -0.02, 0.06]]);
 const PULM_LEFT_SEGS = makeSegments([[-0.26, 0.77, 0.12, 0.07], [0.02, 0.84, -0.16, 0.058]]);
-const SVC_SEGS = makeSegments([[-0.43, 0.38, 0.0, 0.078], [-0.46, 0.96, -0.02, 0.07]]);
+const PULM_LAT_TOP_SEGS = makeSegments([[0.36, 0.46, -0.12, 0.044], [0.55, 0.44, -0.14, 0.038]]);
+const PULM_LAT_BOT_SEGS = makeSegments([[0.38, 0.32, -0.14, 0.040], [0.56, 0.30, -0.16, 0.035]]);
+
+const SVC_SEGS = makeSegments([[-0.43, 0.38, 0.0, 0.082], [-0.46, 0.98, -0.02, 0.074]]);
 const GROOVE_SEGS = makeSegments([
-  [0.02, 0.4, 0.3, 0.03],
-  [-0.06, 0.05, 0.4, 0.028],
-  [-0.2, -0.4, 0.3, 0.024],
-  [-0.27, -0.66, 0.12, 0.02],
+  [0.02, 0.4, 0.3, 0.032],
+  [-0.06, 0.05, 0.4, 0.03],
+  [-0.2, -0.4, 0.3, 0.026],
+  [-0.27, -0.66, 0.12, 0.022],
 ]);
 
 /** signed distance to the heart (model space; negative inside) */
@@ -199,9 +205,12 @@ export function heartSdf(x: number, y: number, z: number): number {
     let v = pathFast(x, y, z, AORTA_SEGS);
     v = smin(v, pathFast(x, y, z, ARCH_A_SEGS), 0.03);
     v = smin(v, pathFast(x, y, z, ARCH_B_SEGS), 0.03);
+    v = smin(v, pathFast(x, y, z, ARCH_C_SEGS), 0.03);
     v = smin(v, pathFast(x, y, z, PULM_TRUNK_SEGS), 0.05);
     v = smin(v, pathFast(x, y, z, PULM_RIGHT_SEGS), 0.04);
     v = smin(v, pathFast(x, y, z, PULM_LEFT_SEGS), 0.04);
+    v = smin(v, pathFast(x, y, z, PULM_LAT_TOP_SEGS), 0.035);
+    v = smin(v, pathFast(x, y, z, PULM_LAT_BOT_SEGS), 0.035);
     v = smin(v, pathFast(x, y, z, SVC_SEGS), 0.05);
     d = smin(d, v, 0.07);
   }

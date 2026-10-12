@@ -11,6 +11,7 @@ import { Journey } from "@/components/sections/Journey";
 import { Leadership } from "@/components/sections/Leadership";
 import { Showcase } from "@/components/sections/Showcase";
 import { Insights } from "@/components/sections/Insights";
+import { FAQ } from "@/components/sections/FAQ";
 import { Motion } from "@/components/Motion";
 import { MobileCta } from "@/components/MobileCta";
 import { FloatingActions } from "@/components/FloatingActions";
@@ -23,21 +24,24 @@ export default function Home() {
       <Header />
       <main id="main">
         <Hero />
-        <Approach />
-        <Stats />
+           <Stats />
+      
+     
         <Expertise />
         <About />
         <Showcase />
         <Journey />
         <Awards />
         <Leadership />
-        <Insights />
+        <Insights />  
+        <Approach />
+        <FAQ />
         <Contact />
       </main>
       <Footer />
       <MobileCta />
       <FloatingActions />
-      <Motion />
+      <Motion />  
     </>
   );
 }

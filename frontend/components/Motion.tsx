@@ -70,23 +70,24 @@ export function Motion() {
 
         /* ---------------- hero intro ---------------- */
         const hero = (name: string) => all(`[data-hero="${name}"]`);
-        gsap.set(hero("line"), { opacity: 1, yPercent: 120 });
-        gsap.set([...hero("eyebrow"), ...hero("meta"), ...hero("cta")], { opacity: 0, y: 26 });
-        gsap.set(hero("header"), { opacity: 0, y: -28 });
-        gsap.set(hero("portrait"), { opacity: 0, y: 60, scale: 1.06 });
-        gsap.set(hero("heart"), { opacity: 0, scale: 0.8, rotate: -5 });
-        gsap.set(hero("badge"), { opacity: 0, y: 34, scale: 0.9 });
+        if (hero("line").length) gsap.set(hero("line"), { opacity: 1, yPercent: 120 });
+        const textElements = [...hero("eyebrow"), ...hero("meta"), ...hero("cta")];
+        if (textElements.length) gsap.set(textElements, { opacity: 0, y: 26 });
+        if (hero("header").length) gsap.set(hero("header"), { opacity: 0, y: -28 });
+        if (hero("portrait").length) gsap.set(hero("portrait"), { opacity: 0, y: 60, scale: 1.06 });
+        if (hero("heart").length) gsap.set(hero("heart"), { opacity: 0, scale: 0.8, rotate: -5 });
+        if (hero("badge").length) gsap.set(hero("badge"), { opacity: 0, y: 34, scale: 0.9 });
 
         const heroTl = gsap
-          .timeline({ paused: true, defaults: { ease: "power3.out" }, delay: 0.1 })
-          .to(hero("portrait"), { opacity: 1, y: 0, scale: 1, duration: 1.8 }, 0)
-          .to(hero("heart"), { opacity: 1, scale: 1, rotate: 0, duration: 2 }, 0.25)
-          .to(hero("header"), { opacity: 1, y: 0, duration: 1 }, 0.3)
-          .to(hero("eyebrow"), { opacity: 1, y: 0, duration: 0.9 }, 0.4)
-          .to(hero("line"), { yPercent: 0, duration: 1.3, ease: "power4.out", stagger: 0.12 }, 0.5)
-          .to(hero("meta"), { opacity: 1, y: 0, duration: 1 }, 1.05)
-          .to(hero("cta"), { opacity: 1, y: 0, duration: 1, stagger: 0.12 }, 1.2)
-          .to(hero("badge"), { opacity: 1, y: 0, scale: 1, duration: 1.1, stagger: 0.2, ease: "back.out(1.5)" }, 1.55);
+          .timeline({ paused: true, defaults: { ease: "power3.out" }, delay: 0.1 });
+        if (hero("portrait").length) heroTl.to(hero("portrait"), { opacity: 1, y: 0, scale: 1, duration: 1.8 }, 0);
+        if (hero("heart").length) heroTl.to(hero("heart"), { opacity: 1, scale: 1, rotate: 0, duration: 2 }, 0.25);
+        if (hero("header").length) heroTl.to(hero("header"), { opacity: 1, y: 0, duration: 1 }, 0.3);
+        if (hero("eyebrow").length) heroTl.to(hero("eyebrow"), { opacity: 1, y: 0, duration: 0.9 }, 0.4);
+        if (hero("line").length) heroTl.to(hero("line"), { yPercent: 0, duration: 1.3, ease: "power4.out", stagger: 0.12 }, 0.5);
+        if (hero("meta").length) heroTl.to(hero("meta"), { opacity: 1, y: 0, duration: 1 }, 1.05);
+        if (hero("cta").length) heroTl.to(hero("cta"), { opacity: 1, y: 0, duration: 1, stagger: 0.12 }, 1.2);
+        if (hero("badge").length) heroTl.to(hero("badge"), { opacity: 1, y: 0, scale: 1, duration: 1.1, stagger: 0.2, ease: "back.out(1.5)" }, 1.55);
 
         // the intro plays once the preloader shutters have opened
         if (html.classList.contains("is-loaded") || !document.getElementById("preloader")) {

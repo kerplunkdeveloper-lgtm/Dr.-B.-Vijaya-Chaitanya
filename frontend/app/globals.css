@@ -112,13 +112,13 @@ section[id] {
     @apply text-[11px] font-medium uppercase tracking-[0.3em] text-secondary-deep;
   }
   .rule {
-    @apply block h-[2px] w-9 rounded-full bg-secondary;
+    @apply block h-0.5 w-9 rounded-full bg-secondary;
   }
   .display {
-    @apply font-serif font-light tracking-[-0.025em];
+    @apply font-serif font-light tracking-tight;
   }
   .container-x {
-    @apply mx-auto w-full max-w-[1320px] px-5 sm:px-8 lg:px-12 2xl:max-w-[1440px] min-[1920px]:max-w-[1560px];
+    @apply mx-auto w-full max-w-330 px-5 sm:px-8 lg:px-12 2xl:max-w-360 min-[1920px]:max-w-[1560px];
   }
   .card {
     @apply rounded-2xl border border-line bg-white;

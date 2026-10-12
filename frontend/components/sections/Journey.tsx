@@ -1,9 +1,19 @@
 import { JOURNEY } from "@/lib/site";
-import { Landscape } from "../art/Landscape";
-import { BuildingHeartIcon, CapIcon, MedalIcon } from "../icons";
-
-const icons = { role: BuildingHeartIcon, fellowship: MedalIcon, degree: CapIcon } as const;
+import { BuildingHeartIcon, CapIcon, MedalIcon, ShieldStarIcon } from "../icons";
 import { Reveal } from "../Reveal";
+import { PatientJourneyVisual } from "./PatientJourneyVisual";
+
+const icons: Record<string, React.ComponentType<any>> = {
+  role: BuildingHeartIcon,
+  career: BuildingHeartIcon,
+  Career: BuildingHeartIcon,
+  fellowship: MedalIcon,
+  Fellowship: MedalIcon,
+  advanced: ShieldStarIcon,
+  Advanced: ShieldStarIcon,
+  degree: CapIcon,
+  Degree: CapIcon,
+};
 
 export function Journey() {
   return (
@@ -15,7 +25,7 @@ export function Journey() {
     >
       <div className="container-x grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-20">
         {/* ---- intro + visual (stays in view while the timeline scrolls) ---- */}
-        <div className="lg:sticky lg:top-[112px] lg:self-start">
+        <div className="lg:sticky lg:top-28 lg:self-start">
           <p data-g="reveal" className="eyebrow">
             The Journey
           </p>
@@ -23,47 +33,38 @@ export function Journey() {
           <h2
             id="journey-title"
             data-g="split"
-            className="display mt-6 max-w-[520px] text-[clamp(1.8rem,2.8vw,2.6rem)] leading-[1.2] text-ink"
+            className="display mt-6 max-w-130 text-[clamp(1.8rem,2.8vw,2.6rem)] leading-[1.2] text-ink"
           >
             A path shaped by learning, experience and a commitment to better care.
           </h2>
 
-          <Reveal className="relative mt-10 hidden aspect-[16/10] overflow-hidden rounded-[28px] shadow-[0_40px_70px_-44px_rgba(16,42,67,0.6)] md:block">
-            <div data-g="parallax" data-speed="0.05" className="absolute inset-0">
-              <Landscape uid="journey" className="h-full w-full" />
-            </div>
-            <div
-              aria-hidden
-              className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-navy/55 to-transparent"
-            />
-            <p className="absolute bottom-5 left-6 text-[11px] font-medium uppercase tracking-[0.3em] text-white/90">
-              Learning · Experience · Care
-            </p>
+          <Reveal className="block">
+            <PatientJourneyVisual />
           </Reveal>
         </div>
 
         {/* ---- timeline ---- */}
         <ol className="relative">
-          <span aria-hidden className="absolute bottom-3 left-[11px] top-3 w-px bg-line" />
+          <span aria-hidden className="absolute bottom-3 left-2.75 top-3 w-px bg-line" />
           <span
             aria-hidden
             data-timeline-line
-            className="absolute bottom-3 left-[11px] top-3 w-[2px] -translate-x-px rounded-full bg-secondary"
+            className="absolute bottom-3 left-2.75 top-3 w-0.5 -translate-x-px rounded-full bg-secondary"
           />
 
           {JOURNEY.map((j, i) => {
-            const Icon = icons[j.kind];
+            const Icon = icons[j.kind] || MedalIcon;
             const current = i === 0;
             return (
               <Reveal as="li" key={j.label} delay={i * 60} className="relative pb-10 pl-14 last:pb-0">
                 <span
                   aria-hidden
-                  className={`absolute left-0 top-[18px] flex h-[23px] w-[23px] items-center justify-center rounded-full border bg-white shadow-[0_0_0_6px_#f5f8fa] ${
+                  className={`absolute left-0 top-4.5 flex h-5.75 w-5.75 items-center justify-center rounded-full border bg-white shadow-[0_0_0_6px_#f5f8fa] ${
                     current ? "border-secondary" : "border-secondary/40"
                   }`}
                 >
                   <span
-                    className={`rounded-full bg-secondary ${current ? "anim-glow h-[11px] w-[11px]" : "h-[9px] w-[9px]"}`}
+                    className={`rounded-full bg-secondary ${current ? "anim-glow h-2.75 w-2.75" : "h-2.25 w-2.25"}`}
                   />
                 </span>
 

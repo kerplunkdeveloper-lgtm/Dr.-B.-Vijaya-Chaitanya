@@ -1,23 +1,12 @@
 import Image from "next/image";
-import { EXPERTISE, HERO_STATS, SITE } from "@/lib/site";
-import { Heart } from "../art/Heart";
-import { Heart3D } from "../Heart3D";
+import { HERO_STATS, JOURNEY, SITE } from "@/lib/site";
 import { BuildingHeartIcon, HeartPulseIcon } from "../icons";
 import { IntroVideo } from "../IntroVideo";
 import { ButtonLink } from "../ui";
 
 const LINES = ["Complex", "Hearts.", "Clearer", "Decisions."];
 
-const SPECIALTIES = [
-  { title: "Complex Coronary Angioplasty", tag: "Advanced PCI" },
-  { title: "Primary PCI", tag: "24/7 Emergency" },
-  { title: "Structural Heart Interventions", tag: "TAVI / TAVR" },
-  { title: "Advanced Cardiac Imaging", tag: "IVUS · OCT" },
-  { title: "Peripheral Vascular Interventions", tag: "Limb Salvage" },
-  { title: "Pacemaker · ICD · CRT Implantation", tag: "Device Therapy" },
-  { title: "Rotablation & Calcified Lesions", tag: "Atherectomy" },
-  { title: "Bifurcation & CTO Interventions", tag: "Complex Cases" },
-] as const;
+
 
 /**
  * Layout notes
@@ -30,8 +19,7 @@ const SPECIALTIES = [
  */
 export function Hero() {
   return (
-    <>
-      <section
+    <section
         id="home"
         data-nav="home"
         aria-labelledby="hero-title"
@@ -54,22 +42,6 @@ export function Hero() {
               className="absolute inset-x-[10%] bottom-0 top-[6%] rounded-t-[999px] bg-linear-to-b from-[#d3ece9] via-mist to-white sm:inset-x-[16%] lg:inset-x-[8%] xl:inset-x-[12%]"
             />
 
-            {/* 3D heart with glow + orbit ring */}
-            <div className="anim-float absolute right-[2%] top-[4%] h-[72%] sm:right-[10%] lg:right-[-2%] lg:top-[10%] lg:h-[50%] 2xl:right-[2%]">
-              <div data-hero="heart" data-parallax-hero="-16" className="aspect-4/5 h-full">
-                <div data-pointer="16" className="relative h-full w-full">
-                  <div
-                    aria-hidden
-                    className="absolute left-1/2 top-1/2 h-[92%] w-[92%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(255,106,84,0.22),transparent)] blur-xl"
-                  />
-                  <div
-                    aria-hidden
-                    className="absolute left-1/2 top-1/2 h-[104%] w-[104%] -translate-x-1/2 -translate-y-1/2 animate-[spin_46s_linear_infinite] rounded-full border border-dashed border-secondary/30"
-                  />
-                 
-                </div>
-              </div>
-            </div>
 
             <div
               data-hero="portrait"
@@ -144,7 +116,18 @@ export function Hero() {
 
               <div data-hero="meta" className="mt-6 lg:mt-[clamp(1.25rem,3.2vh,2rem)]">
                 <p className="text-[44px] font-medium tracking-[-0.005em] text-ink">{SITE.name}</p>
-                <ul className="mt-2 space-y-1 text-[20px] font-light leading-relaxed text-slate">
+                {/* Degree pills */}
+                <div className="mt-2.5 flex flex-wrap gap-1.5">
+                  {JOURNEY.filter((j) => j.kind === "degree").map((j) => (
+                    <span
+                      key={j.title}
+                      className="inline-flex items-center rounded-full border border-secondary/25 bg-mist px-3 py-1 text-[12px] font-medium tracking-wide text-secondary-deep"
+                    >
+                      {j.title}
+                    </span>
+                  ))}
+                </div>
+                <ul className="mt-3 space-y-1 text-[18px] font-light leading-relaxed text-slate">
                   {SITE.titles.map((t) => (
                     <li key={t}>{t}</li>
                   ))}
@@ -191,42 +174,5 @@ export function Hero() {
           </div>
         </div>
       </section>
-
-      {/* specialties band */}
-      <div
-        aria-label="Clinical specialties and expertise"
-        className="relative overflow-hidden border-t border-secondary/25 border-b border-navy-2 bg-linear-to-r from-[#07192a] via-navy to-[#07192a] py-4 shadow-[0_4px_24px_-8px_rgba(11,34,57,0.5)] mask-[linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]"
-      >
-        {/* Ambient aqua glow in center */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_50%,rgba(64,159,157,0.16),transparent)]"
-        />
-
-        <div className="marquee flex w-max items-center gap-5 whitespace-nowrap">
-          {[0, 1].map((dup) => (
-            <div key={dup} className="flex items-center gap-5">
-              {SPECIALTIES.map((item) => (
-                <div
-                  key={`${dup}-${item.title}`}
-                  className="group/pill inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 sm:px-5 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.3)] backdrop-blur-md transition-all duration-300 hover:scale-[1.03] hover:border-accent/60 hover:bg-white/12 hover:shadow-[0_0_22px_-4px_rgba(141,211,206,0.4)] cursor-default"
-                >
-                  <span className="relative flex h-2 w-2 shrink-0">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
-                  </span>
-                  <span className="text-[12.5px] font-medium tracking-tight text-white/95 sm:text-[13px]">
-                    {item.title}
-                  </span>
-                  <span className="rounded-full border border-accent/25 bg-accent/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent shadow-[0_0_10px_-3px_rgba(141,211,206,0.3)]">
-                    {item.tag}
-                  </span>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    </>
   );
 }

@@ -44,7 +44,15 @@ const SHOWCASE_MEDIA: Record<
   },
 };
 
-function PanelMedia({ id }: { id: PanelId }) {
+function PanelMedia({
+  id,
+  priority = false,
+  loading,
+}: {
+  id: PanelId;
+  priority?: boolean;
+  loading?: "eager" | "lazy";
+}) {
   if (id === "hospital") {
     return (
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,#1e3a5f_0%,#0b1626_70%)]">
@@ -52,6 +60,8 @@ function PanelMedia({ id }: { id: PanelId }) {
           src="/images/medstar-hospitals.webp"
           alt="Medstar Hospitals building, Vijayawada"
           fill
+          priority={priority}
+          loading={priority ? undefined : loading}
           sizes="(min-width: 1024px) 40vw, 80vw"
           className="object-contain object-bottom px-6 pb-2 pt-8 transition-transform duration-700 ease-out group-hover:scale-105"
         />
@@ -65,6 +75,8 @@ function PanelMedia({ id }: { id: PanelId }) {
       src={media.src}
       alt={media.alt}
       fill
+      priority={priority}
+      loading={priority ? undefined : loading}
       sizes="(min-width: 1024px) 40vw, 80vw"
       className={`${media.objectClass} transition-transform duration-700 ease-out group-hover:scale-105`}
     />
@@ -134,7 +146,7 @@ export function Showcase() {
               }`}
             >
               <div data-panel-media className="absolute -inset-x-[12%] inset-y-0">
-                <PanelMedia id={p.id} />
+                <PanelMedia id={p.id} loading={i < 3 ? "eager" : "lazy"} />
               </div>
               <div
                 aria-hidden

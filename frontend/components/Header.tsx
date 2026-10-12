@@ -53,7 +53,7 @@ export function Header() {
           : "bg-transparent"
       }`}
     >
-      <div className="container-x flex h-[var(--header-h)] items-center justify-between gap-6">
+      <div className="container-x flex h-(--header-h) items-center justify-between gap-6">
         <a
           href="#home"
           className="focus-ring leading-tight"
@@ -98,7 +98,7 @@ export function Header() {
             href="#contact"
             className="focus-ring group inline-flex h-11 items-center gap-3 rounded-full bg-ink px-6 text-[13px] font-medium text-white shadow-[0_14px_30px_-14px_rgba(13,26,46,0.7)] transition hover:bg-primary"
           >
-            Book Appointment
+             Appointment
             <ArrowRight width={14} height={14} className="transition-transform group-hover:translate-x-1" />
           </a>
           <a
@@ -150,7 +150,7 @@ export function Header() {
             onClick={() => setOpen(false)}
             className="focus-ring mt-6 flex h-12 items-center justify-center gap-3 rounded-full bg-ink text-[13px] font-medium text-white"
           >
-            Book Appointment <ArrowRight width={14} height={14} />
+            Appointment <ArrowRight width={14} height={14} />
           </a>
         </nav>
       </div>
