@@ -132,7 +132,7 @@ export function Contact() {
                 href={MAPS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-9 items-center gap-2 rounded-full bg-ink px-4 text-[12.5px] font-medium text-white shadow-sm transition hover:bg-primary"
+                className="inline-flex h-9 items-center gap-2 rounded-full bg-primary px-4 text-[12.5px] font-medium text-white shadow-sm transition hover:bg-primary-dark"
               >
                 <PinIcon width={13} height={13} />
                 Get Directions

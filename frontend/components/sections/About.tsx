@@ -71,25 +71,7 @@ export function About() {
         </Reveal>
       </div>
 
-      {/* pillars */}
-      <div className="container-x relative z-20 mt-10 lg:mt-0 lg:py-12">
-        <ul className="grid gap-5 sm:grid-cols-3 sm:gap-6 lg:gap-10 lg:pl-0">
-          {FEATURES.map((f, i) => {
-            const Icon = featureIcons[f.id];
-            return (
-              <Reveal as="li" key={f.id} delay={i * 80} className="flex items-center gap-4">
-                <span className="inline-flex h-15.5 w-15.5 shrink-0 items-center justify-center rounded-full bg-white text-secondary shadow-[0_14px_30px_-14px_rgba(60,40,20,0.4)]">
-                  <Icon />
-                </span>
-                <div>
-                  <h3 className="text-[14px] font-medium text-ink">{f.title}</h3>
-                  <p className="mt-0.5 text-[12.5px] leading-snug text-slate">{f.text}</p>
-                </div>
-              </Reveal>
-            );
-          })}
-        </ul>
-      </div>
+    
     </section>
   );
 }

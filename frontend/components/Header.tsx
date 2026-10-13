@@ -1,18 +1,59 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NAV, SITE } from "@/lib/site";
-import { ArrowRight, CloseIcon, MenuIcon } from "./icons";
+import { ArrowRight, CloseIcon, HeartPulseIcon, MenuIcon, PhoneIcon } from "./icons";
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [visible, setVisible] = useState(true);
   const [active, setActive] = useState<string>("home");
 
-  // Elevated header after the hero
+  const lastScrollYRef = useRef(0);
+
+  // Smart Hide on Scroll Down, Reveal Smoothly on Scroll Up
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
+    let ticking = false;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Elevation state: glass shadow when scrolled past top area
+      setScrolled(currentScrollY > 24);
+
+      // Always keep header visible near the top of the page (within first 80px)
+      if (currentScrollY <= 80) {
+        setVisible(true);
+        lastScrollYRef.current = currentScrollY;
+        ticking = false;
+        return;
+      }
+
+      const delta = currentScrollY - lastScrollYRef.current;
+
+      // 6px threshold to eliminate trackpad/touch micro-jitter
+      if (Math.abs(delta) > 6) {
+        if (delta > 0 && currentScrollY > 120) {
+          // Scrolling DOWN -> smoothly hide header
+          setVisible(false);
+        } else if (delta < 0) {
+          // Scrolling UP -> smoothly reveal header
+          setVisible(true);
+        }
+        lastScrollYRef.current = currentScrollY;
+      }
+
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(handleScroll);
+        ticking = true;
+      }
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -44,30 +85,55 @@ export function Header() {
     };
   }, [open]);
 
+  // Always keep header visible if mobile drawer is currently open
+  const isHeaderVisible = visible || open;
+
   return (
     <header
       data-hero="header"
-      className={`fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow,backdrop-filter] duration-500 ${
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+        isHeaderVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
+      } ${
         scrolled || open
-          ? "bg-white/95 shadow-[0_1px_0_rgba(16,42,67,0.06)] backdrop-blur-xl"
-          : "bg-transparent"
+          ? "bg-white/95 border-b border-slate-200/80 shadow-[0_10px_30px_-10px_rgba(16,42,67,0.08)] backdrop-blur-2xl"
+          : "bg-transparent border-b border-transparent shadow-none"
       }`}
     >
-      <div className="container-x flex h-(--header-h) items-center justify-between gap-6">
+      <div className="container-x flex h-(--header-h) items-center justify-between gap-4">
+        {/* Brand / Medical Insignia */}
         <a
           href="#home"
-          className="focus-ring leading-tight"
+          className="focus-ring group flex items-center gap-3 transition-transform duration-300 hover:scale-[1.01]"
           aria-label={`${SITE.name} — home`}
           onClick={() => setOpen(false)}
         >
-          <span className="block font-serif text-[19px] tracking-[-0.01em] text-ink sm:text-[21px]">
-            {SITE.name}
-          </span>
-          <span className="block text-[11px] text-slate">{SITE.role}</span>
+          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-linear-to-br from-primary/10 via-secondary/15 to-primary/5 text-primary shadow-[0_2px_8px_-2px_rgba(23,84,134,0.25)] transition-colors duration-300 group-hover:border-primary/40 group-hover:bg-primary/15">
+            <HeartPulseIcon width={21} height={21} className="transition-transform duration-300 group-hover:scale-110" />
+            <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-secondary opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-secondary" />
+            </span>
+          </div>
+
+          <div className="flex flex-col text-left leading-tight">
+            <span className="text-[18px] font-medium tracking-tight text-ink sm:text-[20px]">
+              {SITE.name}
+            </span>
+            <div className="flex items-center gap-2 text-[10.5px]">
+              <span className="font-semibold uppercase tracking-wider text-secondary-deep">
+                {SITE.role}
+              </span>
+              <span className="hidden h-2.5 w-px bg-slate-300 sm:inline" aria-hidden />
+              <span className="hidden text-slate-500 sm:inline font-normal">
+                {SITE.hospital}
+              </span>
+            </div>
+          </div>
         </a>
 
+        {/* Desktop Navigation: Elegant Frosted Pill Capsule */}
         <nav aria-label="Primary" className="hidden xl:block">
-          <ul className="flex items-center gap-7 text-[13px] text-slate 2xl:gap-9">
+          <ul className="flex items-center gap-1 rounded-full border border-slate-200/75 bg-slate-100/70 p-1.5 shadow-[inset_0_1px_2px_rgba(16,42,67,0.03)] backdrop-blur-md">
             {NAV.map((item) => {
               const isActive = active === item.id;
               return (
@@ -75,17 +141,16 @@ export function Header() {
                   <a
                     href={item.href}
                     aria-current={isActive ? "true" : undefined}
-                    className={`focus-ring relative inline-block py-2 transition-colors hover:text-ink ${
-                      isActive ? "text-ink" : ""
+                    className={`focus-ring relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-all duration-300 ${
+                      isActive
+                        ? "bg-white text-primary shadow-[0_2px_8px_-2px_rgba(16,42,67,0.12)] font-semibold ring-1 ring-slate-200/80"
+                        : "text-slate-600 hover:bg-white/70 hover:text-ink"
                     }`}
                   >
+                    {isActive && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-secondary" aria-hidden />
+                    )}
                     {item.label}
-                    <span
-                      aria-hidden
-                      className={`absolute inset-x-0 -bottom-0.5 h-px origin-left bg-secondary transition-transform duration-500 ${
-                        isActive ? "scale-x-100" : "scale-x-0"
-                      }`}
-                    />
                   </a>
                 </li>
               );
@@ -93,65 +158,98 @@ export function Header() {
           </ul>
         </nav>
 
+        {/* Right CTA Actions */}
         <div className="hidden items-center gap-3 xl:flex">
-          <a
-            href="#contact"
-            className="focus-ring group inline-flex h-11 items-center gap-3 rounded-full bg-ink px-6 text-[13px] font-medium text-white shadow-[0_14px_30px_-14px_rgba(13,26,46,0.7)] transition hover:bg-primary"
-          >
-             Appointment
-            <ArrowRight width={14} height={14} className="transition-transform group-hover:translate-x-1" />
-          </a>
           <a
             href={`tel:${SITE.phone.tel}`}
             aria-label={`Call ${SITE.phone.display}`}
-            className="focus-ring inline-flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 bg-white/50 text-ink backdrop-blur transition hover:bg-ink hover:text-white"
+            className="focus-ring group hidden 2xl:inline-flex items-center gap-2.5 rounded-full border border-slate-200/80 bg-white/70 px-3.5 py-2 text-[12px] font-medium text-slate-700 backdrop-blur-md transition-all duration-300 hover:border-primary/40 hover:bg-white hover:text-primary hover:shadow-xs"
           >
-            <ArrowRight width={15} height={15} />
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-mist text-secondary-deep transition-colors duration-300 group-hover:bg-primary group-hover:text-white">
+              <PhoneIcon width={12} height={12} />
+            </span>
+            <span className="font-mono text-[11.5px] tracking-tight">{SITE.phone.display}</span>
+          </a>
+
+          <a
+            href={`tel:${SITE.phone.tel}`}
+            aria-label={`Call ${SITE.phone.display}`}
+            className="focus-ring group inline-flex 2xl:hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/70 text-slate-700 backdrop-blur-md transition-all duration-300 hover:border-primary/40 hover:bg-white hover:text-primary hover:shadow-xs"
+          >
+            <PhoneIcon width={15} height={15} />
+          </a>
+
+          <a
+            href="#contact"
+            className="focus-ring group relative inline-flex h-10.5 items-center gap-2.5 overflow-hidden rounded-full bg-primary px-5.5 text-[12.5px] font-medium tracking-wide text-white shadow-[0_10px_24px_-8px_rgba(23,84,134,0.65)] transition-all duration-300 hover:bg-primary-dark hover:shadow-[0_14px_28px_-6px_rgba(23,84,134,0.75)] active:scale-[0.98]"
+          >
+            <span>Appointment</span>
+            <ArrowRight
+              width={13}
+              height={13}
+              className="transition-transform duration-300 group-hover:translate-x-1"
+            />
           </a>
         </div>
 
+        {/* Mobile menu trigger */}
         <button
           type="button"
-          className="focus-ring -mr-2 inline-flex h-11 w-11 items-center justify-center rounded-full text-ink xl:hidden"
+          className="focus-ring -mr-2 inline-flex h-10.5 w-10.5 items-center justify-center rounded-full border border-slate-200/80 bg-white/80 text-ink shadow-xs backdrop-blur-md transition-colors hover:bg-slate-50 xl:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           aria-controls="mobile-menu"
           onClick={() => setOpen((v) => !v)}
         >
-          {open ? <CloseIcon width={24} height={24} /> : <MenuIcon width={24} height={24} />}
+          {open ? <CloseIcon width={22} height={22} /> : <MenuIcon width={22} height={22} />}
         </button>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile menu drawer */}
       <div
         id="mobile-menu"
         hidden={!open}
-        className="border-t border-ink/5 bg-white/95 backdrop-blur-xl xl:hidden"
+        className="border-t border-slate-200/70 bg-white/95 shadow-xl backdrop-blur-2xl xl:hidden"
       >
         <nav aria-label="Mobile" className="container-x py-6">
           <ul className="flex flex-col">
             {NAV.map((item) => (
-              <li key={item.id} className="border-b border-line/70 last:border-0">
+              <li key={item.id} className="border-b border-line/60 last:border-0">
                 <a
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`focus-ring flex items-center justify-between py-4 font-serif text-[22px] ${
-                    active === item.id ? "text-secondary" : "text-ink"
+                  className={`focus-ring flex items-center justify-between py-3.5 text-[19px] font-medium transition-colors ${
+                    active === item.id ? "text-primary" : "text-ink hover:text-primary"
                   }`}
                 >
-                  {item.label}
-                  <ArrowRight width={16} height={16} className="text-slate" />
+                  <span className="flex items-center gap-2">
+                    {active === item.id && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-secondary" aria-hidden />
+                    )}
+                    {item.label}
+                  </span>
+                  <ArrowRight width={15} height={15} className="text-slate-400" />
                 </a>
               </li>
             ))}
           </ul>
-          <a
-            href="#contact"
-            onClick={() => setOpen(false)}
-            className="focus-ring mt-6 flex h-12 items-center justify-center gap-3 rounded-full bg-ink text-[13px] font-medium text-white"
-          >
-            Appointment <ArrowRight width={14} height={14} />
-          </a>
+
+          <div className="mt-6 flex flex-col gap-3">
+            <a
+              href="#contact"
+              onClick={() => setOpen(false)}
+              className="focus-ring flex h-11 items-center justify-center gap-2.5 rounded-full bg-primary text-[13px] font-medium text-white shadow-md transition hover:bg-primary-dark"
+            >
+              Appointment <ArrowRight width={14} height={14} />
+            </a>
+            <a
+              href={`tel:${SITE.phone.tel}`}
+              className="focus-ring flex h-11 items-center justify-center gap-2.5 rounded-full border border-slate-200/90 bg-white text-[13px] font-medium text-slate-700 shadow-xs transition hover:border-primary/40 hover:text-primary"
+            >
+              <PhoneIcon width={14} height={14} className="text-secondary-deep" />
+              Call: {SITE.phone.display}
+            </a>
+          </div>
         </nav>
       </div>
     </header>

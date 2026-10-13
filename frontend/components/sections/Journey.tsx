@@ -33,14 +33,12 @@ export function Journey() {
           <h2
             id="journey-title"
             data-g="split"
-            className="display mt-6 max-w-130 text-[clamp(1.8rem,2.8vw,2.6rem)] leading-[1.2] text-ink"
+            className="display mt-6 max-w-130 text-[clamp(1.8rem,2.8vw,3.4rem)] leading-[1.2] text-ink"
           >
             A path shaped by learning, experience and a commitment to better care.
           </h2>
 
-          <Reveal className="block">
-            <PatientJourneyVisual />
-          </Reveal>
+         
         </div>
 
         {/* ---- timeline ---- */}

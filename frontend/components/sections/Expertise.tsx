@@ -34,10 +34,7 @@ export function Expertise() {
               for Complex Conditions.
             </h2>
           </div>
-          <p data-g="reveal" className="max-w-[360px] text-[14px] font-light leading-[1.9] text-slate">
-            From complex coronary interventions to structural heart procedures, delivering
-            advanced, evidence-based care.
-          </p>
+        
         </div>
 
         <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:mt-14 lg:grid-cols-4 lg:gap-5">
@@ -49,7 +46,7 @@ export function Expertise() {
                   {/* teal highlight that draws across on hover */}
                   <span
                     aria-hidden
-                    className="absolute left-0 top-0 h-[3px] w-12 bg-secondary transition-[width] duration-500 group-hover:w-full"
+                    className="absolute left-0 top-0 h-0.75 w-12 bg-secondary transition-[width] duration-500 group-hover:w-full"
                   />
                   <div className="flex items-start justify-between">
                     <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-mist text-secondary-deep transition-colors duration-500 group-hover:bg-secondary group-hover:text-white">

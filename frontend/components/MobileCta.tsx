@@ -30,7 +30,7 @@ export function MobileCta() {
       </a>
       <a
         href="#contact"
-        className="focus-ring inline-flex h-12 flex-1 items-center justify-center rounded-full bg-ink text-[13px] font-medium tracking-wide text-white"
+        className="focus-ring inline-flex h-12 flex-1 items-center justify-center rounded-full bg-primary text-[13px] font-medium tracking-wide text-white transition hover:bg-primary-dark"
       >
         Book Appointment
       </a>

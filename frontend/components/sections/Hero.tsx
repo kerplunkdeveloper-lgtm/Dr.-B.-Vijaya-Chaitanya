@@ -39,14 +39,14 @@ export function Hero() {
             <div
               aria-hidden
               data-pointer="-8"
-              className="absolute inset-x-[10%] bottom-0 top-[6%] rounded-t-[999px] bg-linear-to-b from-[#d3ece9] via-mist to-white sm:inset-x-[16%] lg:inset-x-[8%] xl:inset-x-[12%]"
+              className="absolute inset-x-[10%] bottom-0 top-[6%] rounded-t-[999px] bg-linear-to-b from-[#d3ece9] via-mist to-white sm:inset-x-[16%] lg:inset-x-[8%] lg:top-[calc(var(--header-h)+1.25rem)] xl:inset-x-[12%]"
             />
 
 
             <div
               data-hero="portrait"
               data-parallax-hero="6"
-              className="absolute inset-x-0 bottom-0 top-0 sm:inset-x-[8%] lg:inset-x-0 lg:top-[3%]"
+              className="absolute inset-x-0 bottom-0 top-0 sm:inset-x-[8%] lg:inset-x-0 lg:top-[calc(var(--header-h)+0.5rem)]"
             >
               <div data-pointer="10" className="absolute inset-0">
                 <Image
@@ -61,49 +61,13 @@ export function Hero() {
             </div>
             <div className="absolute inset-x-0 bottom-0 h-1/4 bg-linear-to-t from-white via-white/70 to-transparent lg:hidden" />
 
-            {/* floating glass badges (desktop) */}
-            <div className="absolute left-0 top-[22%] hidden lg:block xl:left-[1%]" data-pointer="22">
-              <div className="anim-float-slow">
-                <div
-                  data-hero="badge"
-                  className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/75 py-3 pl-3 pr-5 shadow-[0_26px_50px_-26px_rgba(16,42,67,0.5)] backdrop-blur-md"
-                >
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-mist text-secondary-deep">
-                    <HeartPulseIcon width={22} height={22} />
-                  </span>
-                  <div>
-                    <p className="font-serif text-[22px] font-light leading-none tracking-[-0.02em] text-ink">
-                      26,000+
-                    </p>
-                    <p className="mt-1 text-[11px] font-light text-slate">Coronary angiograms</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="absolute bottom-[17%] right-0 hidden lg:block xl:right-[1%]" data-pointer="26">
-              <div className="anim-float-slow [animation-delay:-3s]">
-                <div
-                  data-hero="badge"
-                  className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/80 py-3 pl-3 pr-5 shadow-[0_26px_50px_-26px_rgba(16,42,67,0.5)] backdrop-blur-md"
-                >
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-ink text-accent">
-                    <BuildingHeartIcon width={22} height={22} />
-                  </span>
-                  <div>
-                    <p className="text-[13px] font-medium leading-none text-ink">{SITE.hospital}</p>
-                    <p className="mt-1.5 text-[11px] font-light text-slate">Managing Director · {SITE.city}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+           
           </div>
 
           {/* ---------- Copy ---------- */}
           <div className="relative z-10 flex flex-col justify-center pb-6 pt-4 lg:py-[calc(var(--header-h)+1.5rem)]">
             <div>
-              <p data-hero="eyebrow" className="eyebrow">
-                Interventional Cardiologist
-              </p>
+             
               <h1
                 id="hero-title"
                 className="display mt-4 text-[clamp(2.4rem,min(4.7vw,7.6vh),5.75rem)] leading-[1.05] text-ink lg:mt-5"
@@ -121,7 +85,7 @@ export function Hero() {
                   {JOURNEY.filter((j) => j.kind === "degree").map((j) => (
                     <span
                       key={j.title}
-                      className="inline-flex items-center rounded-full border border-secondary/25 bg-mist px-3 py-1 text-[12px] font-medium tracking-wide text-secondary-deep"
+                      className="inline-flex items-center  px-3 py-1 text-[12px] font-medium tracking-wide text-secondary-deep"
                     >
                       {j.title}
                     </span>

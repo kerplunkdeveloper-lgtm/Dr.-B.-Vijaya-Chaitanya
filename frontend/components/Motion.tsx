@@ -82,7 +82,20 @@ export function Motion() {
           .timeline({ paused: true, defaults: { ease: "power3.out" }, delay: 0.1 });
         if (hero("portrait").length) heroTl.to(hero("portrait"), { opacity: 1, y: 0, scale: 1, duration: 1.8 }, 0);
         if (hero("heart").length) heroTl.to(hero("heart"), { opacity: 1, scale: 1, rotate: 0, duration: 2 }, 0.25);
-        if (hero("header").length) heroTl.to(hero("header"), { opacity: 1, y: 0, duration: 1 }, 0.3);
+        if (hero("header").length) {
+          heroTl.to(
+            hero("header"),
+            {
+              opacity: 1,
+              y: 0,
+              duration: 1,
+              onComplete: () => {
+                gsap.set(hero("header"), { clearProps: "y,transform" });
+              },
+            },
+            0.3,
+          );
+        }
         if (hero("eyebrow").length) heroTl.to(hero("eyebrow"), { opacity: 1, y: 0, duration: 0.9 }, 0.4);
         if (hero("line").length) heroTl.to(hero("line"), { yPercent: 0, duration: 1.3, ease: "power4.out", stagger: 0.12 }, 0.5);
         if (hero("meta").length) heroTl.to(hero("meta"), { opacity: 1, y: 0, duration: 1 }, 1.05);

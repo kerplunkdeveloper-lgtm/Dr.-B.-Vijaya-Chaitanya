@@ -5,8 +5,9 @@
   Primary #175486 · Secondary #409F9D · Accent #8DD3CE · Typography #102A43 · Background #FFFFFF
 */
 @theme inline {
-  --font-sans: var(--font-poppins), 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-serif: var(--font-poppins), 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: var(--font-poppins), 'Poppins', sans-serif;
+  --font-serif: var(--font-poppins), 'Poppins', sans-serif;
+  --font-display: var(--font-poppins), 'Poppins', sans-serif;
 
   --color-ink: #102a43; /* typography + navy buttons */
   --color-primary: #175486;
@@ -28,16 +29,19 @@
   --header-h: 76px;
 }
 
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-  font-family: var(--font-sans);
+*,
+*::before,
+*::after {
+  font-family: var(--font-poppins), 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+html,
 body {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  font-family: var(--font-poppins), 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   background: var(--color-surface);
   color: var(--color-ink);
-  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -47,16 +51,19 @@ input,
 select,
 textarea,
 optgroup {
-  font-family: inherit;
+  font-family: var(--font-poppins), 'Poppins', sans-serif !important;
 }
 
-@layer base {
-  h1,
-  h2,
-  h3,
-  .font-serif {
-    font-weight: 300;
-  }
+.font-serif,
+.font-sans,
+.display,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-poppins), 'Poppins', sans-serif !important;
 }
 
 /* ---------- Elegance polish ---------- */

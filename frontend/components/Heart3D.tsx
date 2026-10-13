@@ -422,8 +422,8 @@ export function Heart3D({
 
         /* ---------- Heart Mesh Group ---------- */
         const heartGroup = new THREE.Group();
-        const bodyMesh = new THREE.Mesh(bodyGeo, realBodyMat);
-        const arteriesMesh = new THREE.Mesh(tubeGeo, realTubeMat);
+        const bodyMesh = new THREE.Mesh<THREE.BufferGeometry, THREE.Material>(bodyGeo, realBodyMat);
+        const arteriesMesh = new THREE.Mesh<THREE.BufferGeometry, THREE.Material>(tubeGeo, realTubeMat);
         heartGroup.add(bodyMesh, arteriesMesh);
 
         /* ---------- 3D Stent Angioplasty Assembly (LAD Coronary Artery) ---------- */

@@ -4,7 +4,7 @@ import { ArrowRight } from "./icons";
 type ButtonVariant = "dark" | "light" | "outline-light" | "outline-secondary";
 
 const variants: Record<ButtonVariant, string> = {
-  dark: "bg-ink text-white shadow-[0_14px_30px_-14px_rgba(13,26,46,0.7)] hover:bg-primary",
+  dark: "bg-primary text-white shadow-[0_14px_30px_-14px_rgba(23,84,134,0.7)] hover:bg-primary-dark",
   light:
     "bg-white text-ink shadow-[0_14px_30px_-14px_rgba(0,0,0,0.5)] hover:bg-offwhite",
   "outline-light":

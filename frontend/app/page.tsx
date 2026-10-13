@@ -9,7 +9,7 @@ import { Footer } from "@/components/sections/Footer";
 import { Hero } from "@/components/sections/Hero";
 import { Journey } from "@/components/sections/Journey";
 import { Leadership } from "@/components/sections/Leadership";
-import { Showcase } from "@/components/sections/Showcase";
+
 import { Insights } from "@/components/sections/Insights";
 import { FAQ } from "@/components/sections/FAQ";
 import { Motion } from "@/components/Motion";
@@ -29,7 +29,7 @@ export default function Home() {
      
         <Expertise />
         <About />
-        <Showcase />
+       
         <Journey />
         <Awards />
         <Leadership />

@@ -28,11 +28,8 @@ export function Stats() {
         stroke="#8dd3ce"
         flipX
       />
-      {/* live heartbeat trace running behind the numbers */}
-      <EcgLine
-        uid="stats-ecg"
-        className="pointer-events-none absolute inset-x-0 bottom-4 -z-10 h-21 w-full opacity-70 md:h-26"
-      />
+    
+     
 
       <div className="container-x">
         <Reveal className="text-center">
