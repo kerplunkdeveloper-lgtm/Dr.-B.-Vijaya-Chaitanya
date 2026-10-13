@@ -1,26 +1,27 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback, type ReactNode } from "react";
+import type * as THREE from "three";
 
 /**
- * Real Human 3D Cardiac Vasculature & Interventional Simulator (Three.js)
+ * Real Human 3D Cardiac Vasculature, Internal Chamber & Deep Learning AI Simulator (Three.js)
  * 
  * Hyper-Realistic Human Heart Anatomy & Ultra-Premium UX:
- * 1. Real Human 3D Mode: Living human myocardium with wet pericardial sheen,
- *    subsurface scattering, adipose tissue (fat deposits) along coronary sulci,
- *    striated muscle fibers, and true anatomical vessel split (Arterial Red vs Venous Slate Blue).
- * 2. Vintage Anatomical Etching Mode: Exact reproduction of classic Gray's Anatomy copperplate
- *    engraving with fine cross-hatching, muscle fiber lines, and ink contours.
- * 3. 3-Branch Aortic Arch: Brachiocephalic, Left Common Carotid, and Left Subclavian arteries.
- * 4. Pulmonary Trunk & Lateral Branches with anatomical fidelity.
- * 5. Full Interventional Angioplasty Simulator: LAD stenosis, catheter guidewire traversal,
- *    expanding balloon, Nitinol micro-lattice stent dilation, and oxygenated blood perfusion rush.
- * 6. Interactive 3D Landmark Pins with smooth camera focus and clinical procedure notes.
- * 7. Multi-angle 360° Presets (Anterior, Posterior, Left Lateral, Right Lateral, Superior Arch).
- * 8. Real Physiological Cardiac Cycle (Lub-Dub Double Beat) with interactive BPM controls (60, 72, 98, 115).
+ * 1. Reference Image Exact Reproduction: Classical Gray's Anatomy copperplate etching
+ *    with hand-drawn cross-hatching, muscle striations, and vivid arterial/venous color split
+ *    (Arterial Crimson Aorta vs Venous Slate-Blue Pulmonary/SVC).
+ * 2. Internal 4-Chamber Cross-Section Mode: Coronal anatomical cutaway revealing Left & Right Ventricles,
+ *    thick Interventricular Septum (IVS), Mitral & Tricuspid valve fibrous rings, and intracardiac flow.
+ * 3. Deep Learning AI Cardiac Neural Scan HUD: Real-time segmentation reticles, holographic grid sweep,
+ *    and live hemodynamic telemetry (LVEF 62%, Cardiac Output 5.2 L/min, GLS -18.9%).
+ * 4. Realistic Physiological Auscultation Heartbeat Sound: Web Audio API synthesized Lub-Dub (S1 + S2)
+ *    double acoustic beat mathematically locked to the systolic/diastolic animation cycle.
+ *    Sound is MUTED by default with an elegant speaker toggle & animated EQ visualizer.
+ * 5. Full Interventional Angioplasty Simulator: LAD coronary stenosis, balloon dilation, and Nitinol stent.
+ * 6. Interactive 3D Landmark Pins & 360° Anatomical Angle Presets.
  */
 
-export type HeartMode = "real" | "engraving";
+export type HeartMode = "real" | "internal" | "engraving";
 
 type Assets = {
   body: { positions: Float32Array; normals: Float32Array };
@@ -43,13 +44,15 @@ function getAssets(resolution: number): Promise<Assets> {
     const mc = new MarchingCubes(resolution, new THREE.MeshBasicMaterial(), false, false, 180000);
     mc.isolation = 80;
     model.fillHeartField(mc.field, resolution, mc.isolation);
+
+    // Critical: MarchingCubes generates polygons into positionArray inside update()
     mc.update();
 
-    const n = mc.count * 3;
+    const count = mc.count * 3;
     const S = model.MODEL_SCALE;
-    const positions = new Float32Array(n);
-    const normals = new Float32Array(n);
-    for (let i = 0; i < n; i += 3) {
+    const positions = new Float32Array(count);
+    const normals = new Float32Array(count);
+    for (let i = 0; i < count; i += 3) {
       positions[i] = mc.positionArray[i] * S;
       positions[i + 1] = mc.positionArray[i + 1] * S - model.CENTER_Y;
       positions[i + 2] = mc.positionArray[i + 2] * S;
@@ -62,8 +65,96 @@ function getAssets(resolution: number): Promise<Assets> {
     for (let i = 1; i < tubes.positions.length; i += 3) tubes.positions[i] -= model.CENTER_Y;
 
     return { body: { positions, normals }, tubes };
-  })();
+  })().catch((err) => {
+    assetsPromise = null;
+    throw err;
+  });
   return assetsPromise;
+}
+
+/* ---------- Physiological Heartbeat Audio Synthesizer (Web Audio API) ---------- */
+class HeartbeatSynthesizer {
+  private ctx: AudioContext | null = null;
+  private isMuted: boolean = true;
+  private volume: number = 0.55;
+
+  init() {
+    if (!this.ctx && typeof window !== "undefined") {
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
+    }
+    if (this.ctx && this.ctx.state === "suspended") {
+      this.ctx.resume().catch(() => {});
+    }
+  }
+
+  setMuted(muted: boolean) {
+    this.isMuted = muted;
+    if (!muted) {
+      this.init();
+    }
+  }
+
+  // S1 (Systole / Lub): Mitral & Tricuspid valve closure (resonant 55Hz acoustic thump)
+  playLub() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(60, t);
+      osc.frequency.exponentialRampToValueAtTime(30, t + 0.12);
+
+      gain.gain.setValueAtTime(this.volume * 0.9, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.15);
+    } catch {
+      // safe fallback
+    }
+  }
+
+  // S2 (Diastole / Dub): Aortic & Pulmonic semilunar valve closure (sharper 88Hz snap)
+  playDub() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(88, t);
+      osc.frequency.exponentialRampToValueAtTime(40, t + 0.08);
+
+      gain.gain.setValueAtTime(this.volume * 0.7, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.11);
+    } catch {
+      // safe fallback
+    }
+  }
+
+  dispose() {
+    if (this.ctx) {
+      this.ctx.close().catch(() => {});
+      this.ctx = null;
+    }
+  }
 }
 
 /* ---------------- High-Fidelity Anatomical Shaders ---------------- */
@@ -94,89 +185,127 @@ float fbm2(vec3 p){
 }
 `;
 
-/** 1. Real Human Living Myocardium Shader (Subsurface Scattering + Epicardial Adipose Fat) */
+/** 1. Real Living Human Anatomy Shader */
 const REAL_HUMAN_FRAGMENT_GLSL = /* glsl */ `
-  // Anatomical Vessel Classification
   bool isSVC = (vObjPos.y > 0.18 && vObjPos.x < -0.24 && vObjPos.z < 0.20);
   bool isPulm = (vObjPos.y > 0.14 && vObjPos.x >= -0.36 && vObjPos.x <= 0.08 && vObjPos.z >= 0.04);
   bool isVenous = isSVC || isPulm;
   bool isAorta = (vObjPos.y > 0.22 && !isVenous);
 
-  // Living Cardiac Colors
-  vec3 muscleBase = vec3(0.68, 0.08, 0.11);     // Deep living myocardial red
-  vec3 muscleDark = vec3(0.32, 0.03, 0.05);     // Deep vascular shadow
-  vec3 aortaColor = vec3(0.78, 0.12, 0.13);     // Arterial crimson
-  vec3 venousColor = vec3(0.12, 0.29, 0.44);    // Deoxygenated venous slate-blue
+  vec3 muscleBase = vec3(0.70, 0.09, 0.12);     // Living myocardial arterial red
+  vec3 muscleDark = vec3(0.34, 0.03, 0.05);     // Deep vascular shadow
+  vec3 aortaColor = vec3(0.80, 0.13, 0.14);     // High-pressure arterial crimson
+  vec3 venousColor = vec3(0.14, 0.32, 0.48);    // Deoxygenated venous slate blue
 
   vec3 col = muscleBase;
 
   if (isVenous) {
-    col = mix(venousColor * 0.7, venousColor * 1.15, smoothstep(-0.2, 0.8, vWorldNormal.y));
+    col = mix(venousColor * 0.72, venousColor * 1.15, smoothstep(-0.2, 0.8, vWorldNormal.y));
   } else if (isAorta) {
-    col = mix(aortaColor * 0.75, aortaColor * 1.1, smoothstep(-0.2, 0.8, vWorldNormal.y));
+    col = mix(aortaColor * 0.75, aortaColor * 1.12, smoothstep(-0.2, 0.8, vWorldNormal.y));
   } else {
-    // Helical myocardial fiber striations
     float stri = vn(vec3(vObjPos.x * 38.0, vObjPos.y * 10.0, vObjPos.z * 38.0));
     col = mix(muscleDark, col, 0.72 + 0.28 * stri);
 
-    // Epicardial Adipose (Fat Tissue) buffering the coronary grooves
+    // Epicardial Adipose (Fat buffering coronary sulcus)
     float grooveDist = length(vec2(vObjPos.x + 0.10 + vObjPos.y * 0.22, vObjPos.z - 0.26));
     float fatSulcus = smoothstep(0.19, 0.04, grooveDist) * smoothstep(-0.55, 0.26, vObjPos.y);
     float fatCoronary = smoothstep(0.13, 0.03, abs(vObjPos.y - 0.25)) * smoothstep(-0.15, 0.45, vObjPos.z);
     float fatTotal = clamp(fatSulcus + fatCoronary * 0.75, 0.0, 1.0);
     fatTotal *= (0.75 + 0.25 * fbm2(vObjPos * 12.0));
     
-    vec3 fatColor = vec3(0.85, 0.75, 0.44); // Natural yellowish-cream adipose tissue
+    vec3 fatColor = vec3(0.86, 0.76, 0.45);
     col = mix(col, fatColor, fatTotal * 0.82);
 
-    // Subsurface Scattering (SSS) translucent edge glow
+    // Subsurface Scattering (SSS)
     float sss = pow(clamp(dot(-vCamDir, vWorldNormal) + 0.55, 0.0, 1.0), 2.8);
-    col += vec3(0.85, 0.14, 0.08) * sss * 0.32;
+    col += vec3(0.88, 0.15, 0.09) * sss * 0.32;
   }
 
   diffuseColor.rgb = col;
 `;
 
-/** 2. Vintage Gray's Anatomy Copperplate Etching Shader (Matching User Reference Image) */
+/** 2. Reference Image Exact Match: Classical Gray's Anatomy Copperplate Etching Shader */
 const ETCHING_FRAGMENT_GLSL = /* glsl */ `
-  bool isSVC = (vObjPos.y > 0.18 && vObjPos.x < -0.24 && vObjPos.z < 0.20);
-  bool isPulm = (vObjPos.y > 0.14 && vObjPos.x >= -0.36 && vObjPos.x <= 0.08 && vObjPos.z >= 0.04);
+  // Anatomical Region Segmentation
+  bool isSVC = (vObjPos.y > 0.18 && vObjPos.x < -0.22 && vObjPos.z < 0.22);
+  bool isPulm = (vObjPos.y > 0.13 && vObjPos.x >= -0.36 && vObjPos.x <= 0.08 && vObjPos.z >= 0.02);
   bool isVenous = isSVC || isPulm;
-  bool isAorta = (vObjPos.y > 0.22 && !isVenous);
+  bool isAorta = (vObjPos.y > 0.20 && !isVenous);
 
-  // Exact Gray's Anatomy Etching Palette (Warm coral muscle, blue venous, red aorta)
-  vec3 venousBase = vec3(0.15, 0.32, 0.48);     // Steel / Slate Blue
-  vec3 venousDark = vec3(0.04, 0.12, 0.20);
-  vec3 aortaBase  = vec3(0.84, 0.16, 0.14);     // Terracotta / Arterial Red
-  vec3 aortaDark  = vec3(0.42, 0.05, 0.06);
-  vec3 ventBase   = vec3(0.90, 0.35, 0.28);     // Warm fleshy coral / salmon
-  vec3 ventDark   = vec3(0.48, 0.08, 0.08);
+  // Exact matching colors from Reference Image
+  vec3 venousLight = vec3(0.38, 0.54, 0.64);   // Slate-Blue highlight (#618aa3)
+  vec3 venousBase  = vec3(0.28, 0.44, 0.53);   // Slate-Blue primary body (#477087)
+  vec3 venousDark  = vec3(0.12, 0.22, 0.28);   // Deep navy shadow (#1f3847)
+
+  vec3 aortaLight  = vec3(0.95, 0.32, 0.28);   // Scarlet arch highlight (#f25247)
+  vec3 aortaBase   = vec3(0.85, 0.22, 0.20);   // Cadmium red arch (#d93833)
+  vec3 aortaDark   = vec3(0.48, 0.08, 0.08);   // Deep crimson shadow (#7a1414)
+
+  vec3 ventHighlight = vec3(0.98, 0.74, 0.62); // Anterior salmon-peach highlight (#fbbda0)
+  vec3 ventBase      = vec3(0.93, 0.46, 0.38); // Warm coral myocardium (#ed7561)
+  vec3 ventDark      = vec3(0.56, 0.14, 0.15); // Deep ventricular sulcus shadow (#8f2426)
+
+  // Natural surface lighting orientation
+  vec3 lightDir = normalize(vec3(0.35, 0.8, 0.55));
+  float NdotL = dot(vWorldNormal, lightDir);
+  float diff = smoothstep(-0.25, 0.85, NdotL);
+
+  // Vessel lumen openings (dark cut pipe ends at top of vessels as seen in illustration)
+  bool isSVCLumen = (isSVC && vObjPos.y > 0.90);
+  bool isAortaBranchLumen = (isAorta && vObjPos.y > 0.84 && vObjPos.z < -0.02);
 
   vec3 col = ventBase;
   vec3 colDark = ventDark;
 
   if (isVenous) {
-    col = venousBase;
+    col = mix(venousDark, venousBase, diff * 0.7 + 0.3);
+    col = mix(col, venousLight, smoothstep(0.4, 0.95, diff));
     colDark = venousDark;
+    if (isSVCLumen) {
+      col = mix(vec3(0.10, 0.16, 0.22), col, smoothstep(0.90, 0.95, vObjPos.y));
+    }
   } else if (isAorta) {
-    col = aortaBase;
+    col = mix(aortaDark, aortaBase, diff * 0.65 + 0.35);
+    col = mix(col, aortaLight, smoothstep(0.4, 0.95, diff));
     colDark = aortaDark;
+    if (isAortaBranchLumen) {
+      col = mix(vec3(0.28, 0.05, 0.06), col, smoothstep(0.84, 0.89, vObjPos.y));
+    }
+  } else {
+    // Ventricular body with warm peach center highlight (matching reference image)
+    float centerHighlight = smoothstep(0.15, 0.55, vObjPos.z) * smoothstep(-0.45, 0.15, vObjPos.y) * smoothstep(-0.35, 0.25, vObjPos.x);
+    col = mix(ventBase, ventHighlight, centerHighlight * 0.75);
+    col = mix(ventDark, col, diff * 0.75 + 0.25);
+
+    // Anatomical muscle striations
+    float stri = vn(vec3(vObjPos.x * 32.0, vObjPos.y * 8.5, vObjPos.z * 32.0));
+    col *= (0.92 + 0.16 * stri);
   }
 
-  // Copperplate Cross-Hatching & Fine Muscle Contour Lines
-  float hatch1 = sin(vObjPos.y * 130.0 + vObjPos.x * 25.0) * 0.5 + 0.5;
-  float hatch2 = sin((vObjPos.x - vObjPos.y) * 95.0) * 0.5 + 0.5;
-  float etch = mix(hatch1, hatch2, 0.35);
-  etch = smoothstep(0.2, 0.85, etch);
+  // Classical Copperplate Woodcut Engraving Cross-Hatching
+  // 1. Primary Hatch Lines along muscle contours
+  float hatch1 = abs(sin(vObjPos.y * 145.0 + vObjPos.x * 40.0));
+  hatch1 = smoothstep(0.16, 0.84, hatch1);
 
-  // Muscle fiber striations
-  float stri = vn(vec3(vObjPos.x * 34.0, vObjPos.y * 8.0, vObjPos.z * 34.0));
-  col *= 0.86 + 0.28 * stri;
-  col = mix(colDark, col, 0.62 + 0.38 * etch);
+  // 2. Secondary Cross-Hatch Lines in shadow regions
+  float hatch2 = abs(sin((vObjPos.y - vObjPos.x) * 115.0 + vObjPos.z * 35.0));
+  hatch2 = smoothstep(0.22, 0.86, hatch2);
 
-  // Hand-drawn Black Ink Silhouette Rim
-  float inkRim = pow(1.0 - max(dot(vWorldNormal, vCamDir), 0.0), 2.8);
-  col = mix(col, vec3(0.06, 0.02, 0.02), clamp(inkRim * 0.72, 0.0, 1.0));
+  // Apply crosshatching proportional to shadow density
+  float shadowDensity = 1.0 - diff;
+  float inkPattern = hatch1;
+  if (shadowDensity > 0.42) {
+    inkPattern = min(hatch1, hatch2);
+  }
+  float inkFade = smoothstep(0.15, 0.85, shadowDensity);
+  col = mix(col, colDark * 0.7, inkFade * (1.0 - inkPattern) * 0.78);
+
+  // Hand-Drawn Dark Ink Contour Silhouettes (Woodcut outer outline)
+  float rim = 1.0 - max(dot(vWorldNormal, vCamDir), 0.0);
+  float inkOutline = smoothstep(0.46, 0.86, rim);
+  vec3 inkBlack = vec3(0.08, 0.03, 0.03);
+  col = mix(col, inkBlack, inkOutline * 0.86);
 
   diffuseColor.rgb = col;
 `;
@@ -189,17 +318,18 @@ export interface Hotspot {
   tag: string;
   desc: string;
   clinical: string;
+  isInternal?: boolean;
 }
 
 export const ANATOMICAL_HOTSPOTS: Hotspot[] = [
   {
     id: "aorta",
-    name: "Aortic Arch & Valve (TAVI Landing Zone)",
+    name: "Aortic Arch & Branches (Brachiocephalic, Carotid, Subclavian)",
     pos: [0.24, 0.78, -0.06],
     targetRot: [0.22, 0.32],
     tag: "TAVI / Structural Heart",
-    desc: "The primary systemic arterial trunk delivering oxygenated blood under high systolic pressure to the brain and entire human body.",
-    clinical: "Transcatheter Aortic Valve Implantation (TAVI/TAVR) landing zone deployed across calcified aortic stenosis without open-heart surgery.",
+    desc: "The primary systemic arterial trunk delivering oxygenated blood under high pressure. Gives rise to 3 critical cranial branches.",
+    clinical: "Transcatheter Aortic Valve Implantation (TAVI/TAVR) landing zone for severe aortic stenosis without open-heart surgery.",
   },
   {
     id: "lad",
@@ -207,8 +337,17 @@ export const ANATOMICAL_HOTSPOTS: Hotspot[] = [
     pos: [0.06, 0.02, 0.32],
     targetRot: [0.15, -0.25],
     tag: "Coronary Angioplasty (PCI)",
-    desc: "The critical coronary artery ('Widowmaker') supplying 50%+ of the left ventricular myocardium down to the apex.",
-    clinical: "Target for fractional flow reserve (FFR), OCT plaque morphology, and drug-eluting stent deployment with high procedural success.",
+    desc: "The critical anterior coronary artery perfusing over 50% of left ventricular myocardium down to the cardiac apex.",
+    clinical: "Primary target for intravascular imaging (OCT/IVUS), physiological FFR guidance, and drug-eluting stent deployment.",
+  },
+  {
+    id: "pulmonary",
+    name: "Pulmonary Trunk & Vena Cava (Deoxygenated Return)",
+    pos: [-0.18, 0.60, 0.16],
+    targetRot: [0.15, -0.75],
+    tag: "Pulmonary Vascular Circuit",
+    desc: "Large venous trunk conducting deoxygenated blood into right and left pulmonary arteries for alveolar gas exchange.",
+    clinical: "Evaluated in pulmonary hypertension, PE catheter thrombectomy, and structural congenital heart interventions.",
   },
   {
     id: "rca",
@@ -216,76 +355,80 @@ export const ANATOMICAL_HOTSPOTS: Hotspot[] = [
     pos: [-0.34, 0.12, 0.22],
     targetRot: [-0.05, -0.95],
     tag: "Right Ventricle & SA Node",
-    desc: "Traverses the right atrioventricular groove, perfusing the right ventricle, inferior LV wall, and cardiac conduction system.",
-    clinical: "Crucial in inferior myocardial infarction; treated via radial access coronary angioplasty with bioresorbable polymers.",
-  },
-  {
-    id: "pulmonary",
-    name: "Pulmonary Trunk & Bifurcation",
-    pos: [-0.18, 0.60, 0.16],
-    targetRot: [0.15, -0.75],
-    tag: "Pulmonary Vascular Circuit",
-    desc: "Large venous trunk crossing anterior to the ascending aorta, conducting deoxygenated blood into right and left pulmonary arteries.",
-    clinical: "Inspected for pulmonary thromboembolism, pulmonary hypertension, and congenital structural abnormalities.",
-  },
-  {
-    id: "svc",
-    name: "Superior Vena Cava (SVC)",
-    pos: [-0.44, 0.74, -0.02],
-    targetRot: [0.10, -1.05],
-    tag: "Venous Conduit",
-    desc: "Major venous vessel returning blood from the upper half of the body directly into the right atrium.",
-    clinical: "Key venous corridor for transvenous dual-chamber pacemaker leads, CRT-D device implantation, and central vascular access.",
+    desc: "Traverses the right atrioventricular groove, supplying the RV, posterior LV wall, and cardiac pacemaker conduction system.",
+    clinical: "Target in acute inferior wall myocardial infarction; managed via radial-first precision coronary intervention.",
   },
   {
     id: "apex",
-    name: "Left Ventricular Apex",
+    name: "Left Ventricular Apex (Muscular High-Pressure Pump)",
     pos: [-0.22, -0.68, 0.12],
     targetRot: [-0.25, -0.45],
-    tag: "High-Pressure Systolic Pump",
-    desc: "The muscular apex formed by the left ventricle, generating maximum stroke volume and ejection fraction (>55-60%).",
-    clinical: "Monitored for regional wall motion abnormalities, left ventricular aneurysm, and apical ballooning (Takotsubo cardiomyopathy).",
+    tag: "Systolic Contraction",
+    desc: "The conical muscular tip of the left ventricle generating high systolic stroke volume and peak ejection fraction.",
+    clinical: "Assessed via echocardiography and cardiac MRI for apical ballooning, aneurysm, and strain rate index.",
+  },
+  {
+    id: "mitral_valve",
+    name: "Mitral Valve Annulus (Internal Cavity)",
+    pos: [0.14, 0.18, -0.06],
+    targetRot: [0.35, 0.2],
+    tag: "Internal 4-Chamber View",
+    desc: "Dual-leaflet atrioventricular valve regulating unidirectional oxygenated blood flow from Left Atrium into Left Ventricle.",
+    clinical: "Target for MitraClip percutaneous edge-to-edge repair (TEER) in severe mitral regurgitation.",
+    isInternal: true,
+  },
+  {
+    id: "ivs_septum",
+    name: "Interventricular Septum (IVS)",
+    pos: [-0.06, -0.15, -0.04],
+    targetRot: [0.2, 0.05],
+    tag: "Internal 4-Chamber View",
+    desc: "Thick muscular partition separating the high-pressure Left Ventricle from the lower-pressure Right Ventricle.",
+    clinical: "Assessed for Ventricular Septal Defects (VSD) closed via percutaneous Amplatzer occluder devices.",
+    isInternal: true,
   },
 ];
 
-export function Heart3D({
-  className = "",
-  children,
-}: {
-  className?: string;
-  children?: ReactNode;
-}) {
+export function Heart3D({ className = "", children }: { className?: string; children?: ReactNode }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // State
+  // States
+  const [mode, setMode] = useState<HeartMode>("engraving");
+  const [bpm, setBpm] = useState<number>(72);
   const [isReady, setIsReady] = useState(false);
-  const [mode, setMode] = useState<HeartMode>("real");
+  const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
+  const [hotspotScreenPositions, setHotspotScreenPositions] = useState<
+    { id: string; x: number; y: number; visible: boolean }[]
+  >([]);
   const [showPins, setShowPins] = useState(true);
   const [isStentDeployed, setIsStentDeployed] = useState(false);
   const [stentProgress, setStentProgress] = useState(0);
-  const [bpm, setBpm] = useState<number>(72);
-  const [activeHotspot, setActiveHotspot] = useState<Hotspot | null>(null);
-  const [hotspotScreenPositions, setHotspotScreenPositions] = useState<
-    Array<{ id: string; x: number; y: number; visible: boolean }>
-  >([]);
 
-  // Refs for requestAnimationFrame loop
-  const modeRef = useRef<HeartMode>(mode);
-  const bpmRef = useRef<number>(bpm);
+  // Audio Auscultation State (Default: MUTED as requested)
+  const [isMuted, setIsMuted] = useState(true);
+
+  // AI Deep Learning Neural Scan State
+  const [aiScanActive, setAiScanActive] = useState(false);
+
+  // Mutable animation refs
+  const bpmRef = useRef(bpm);
+  const modeRef = useRef(mode);
+  const showPinsRef = useRef(showPins);
+  const isStentDeployedRef = useRef(isStentDeployed);
+  const stentProgressRef = useRef(0);
   const targetRotRef = useRef<{ x: number; y: number } | null>(null);
-  const targetZoomRef = useRef<number>(1.0);
-  const isStentDeployedRef = useRef<boolean>(isStentDeployed);
-  const stentProgressRef = useRef<number>(0);
-  const showPinsRef = useRef<boolean>(showPins);
-
-  useEffect(() => {
-    modeRef.current = mode;
-  }, [mode]);
+  const targetZoomRef = useRef(1.0);
+  const audioSynthRef = useRef<HeartbeatSynthesizer | null>(null);
+  const aiScanRef = useRef(aiScanActive);
 
   useEffect(() => {
     bpmRef.current = bpm;
   }, [bpm]);
+
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
 
   useEffect(() => {
     showPinsRef.current = showPins;
@@ -294,6 +437,18 @@ export function Heart3D({
   useEffect(() => {
     isStentDeployedRef.current = isStentDeployed;
   }, [isStentDeployed]);
+
+  useEffect(() => {
+    aiScanRef.current = aiScanActive;
+  }, [aiScanActive]);
+
+  // Audio Mute Bridge
+  useEffect(() => {
+    if (!audioSynthRef.current) {
+      audioSynthRef.current = new HeartbeatSynthesizer();
+    }
+    audioSynthRef.current.setMuted(isMuted);
+  }, [isMuted]);
 
   // Three.js Scene Setup & Loop
   useEffect(() => {
@@ -306,14 +461,13 @@ export function Heart3D({
 
     (async () => {
       try {
-        // High resolution MarchingCubes (62) for smooth real-human anatomical curvature
-        const [THREE, assets] = await Promise.all([import("three"), getAssets(62)]);
+        const [THREE, assets] = await Promise.all([import("three"), getAssets(54)]);
         if (cancelled) return;
 
         const reduce =
           window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-        // Renderer
+        // Renderer with Local Clipping enabled for Internal Chamber View
         const renderer = new THREE.WebGLRenderer({
           canvas,
           antialias: true,
@@ -325,24 +479,21 @@ export function Heart3D({
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.15;
         renderer.setClearColor(0x000000, 0);
+        renderer.localClippingEnabled = true;
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 50);
 
         /* ---------- Surgical Lighting Setup ---------- */
-        // Clinical overhead key light
         const keyLight = new THREE.DirectionalLight(0xfff6ee, 3.4);
         keyLight.position.set(-2.8, 3.8, 4.2);
 
-        // Soft warm tissue fill light
         const fillLight = new THREE.DirectionalLight(0xffb2a5, 1.3);
         fillLight.position.set(3.4, -1.6, 3.2);
 
-        // Crisp anatomical rim light
         const rimLight = new THREE.DirectionalLight(0x38bdf8, 2.2);
         rimLight.position.set(3.6, 2.2, -3.6);
 
-        // Deep cavity ambient light
         const hemiLight = new THREE.HemisphereLight(0x8ecae6, 0x1b2838, 1.4);
         scene.add(keyLight, fillLight, rimLight, hemiLight);
 
@@ -350,6 +501,7 @@ export function Heart3D({
         const bodyGeo = new THREE.BufferGeometry();
         bodyGeo.setAttribute("position", new THREE.BufferAttribute(assets.body.positions, 3));
         bodyGeo.setAttribute("normal", new THREE.BufferAttribute(assets.body.normals, 3));
+        bodyGeo.computeVertexNormals();
         bodyGeo.computeBoundingSphere();
 
         const tubeGeo = new THREE.BufferGeometry();
@@ -357,8 +509,11 @@ export function Heart3D({
         tubeGeo.setAttribute("normal", new THREE.BufferAttribute(assets.tubes.normals, 3));
         tubeGeo.setIndex(new THREE.BufferAttribute(assets.tubes.indices, 1));
 
+        // Coronal Anatomical Cutaway Clipping Plane
+        const coronalClipPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0.05);
+
         /* ---------- High-Fidelity Materials ---------- */
-        // 1. Real Human Living Myocardium Material
+        // 1. Real Living Human Anatomy
         const realBodyMat = new THREE.MeshPhysicalMaterial({
           roughness: 0.28,
           metalness: 0.03,
@@ -366,6 +521,8 @@ export function Heart3D({
           clearcoatRoughness: 0.12,
           sheen: 0.45,
           sheenColor: new THREE.Color(0xdc2626),
+          side: THREE.DoubleSide,
+          clipShadows: true,
         });
         realBodyMat.onBeforeCompile = (shader) => {
           shader.vertexShader = shader.vertexShader
@@ -391,10 +548,12 @@ export function Heart3D({
           emissiveIntensity: 0.35,
         });
 
-        // 2. Vintage Gray's Anatomy Copperplate Etching Material
+        // 2. Reference Image Exact Match: Classical Gray's Anatomy Copperplate Etching
         const etchingBodyMat = new THREE.MeshStandardMaterial({
           roughness: 0.38,
           metalness: 0.04,
+          side: THREE.DoubleSide,
+          clipShadows: true,
         });
         etchingBodyMat.onBeforeCompile = (shader) => {
           shader.vertexShader = shader.vertexShader
@@ -413,18 +572,136 @@ export function Heart3D({
         };
 
         const etchingTubeMat = new THREE.MeshStandardMaterial({
-          color: 0x8b1818,
-          roughness: 0.32,
-          metalness: 0.1,
-          emissive: new THREE.Color(0xdc2626),
+          color: 0x3a0a10, // Deep dark ink-maroon matching the reference illustration's branching coronary arteries
+          roughness: 0.35,
+          metalness: 0.15,
+          emissive: new THREE.Color(0x611119),
           emissiveIntensity: 0.28,
         });
 
         /* ---------- Heart Mesh Group ---------- */
         const heartGroup = new THREE.Group();
-        const bodyMesh = new THREE.Mesh<THREE.BufferGeometry, THREE.Material>(bodyGeo, realBodyMat);
-        const arteriesMesh = new THREE.Mesh<THREE.BufferGeometry, THREE.Material>(tubeGeo, realTubeMat);
+        const bodyMesh = new THREE.Mesh(bodyGeo, etchingBodyMat);
+        const arteriesMesh = new THREE.Mesh(tubeGeo, etchingTubeMat);
         heartGroup.add(bodyMesh, arteriesMesh);
+
+        /* ---------- Internal 4-Chamber Anatomical Architecture ---------- */
+        const internalChamberGroup = new THREE.Group();
+        internalChamberGroup.visible = false;
+
+        // 1. Interventricular Septum (IVS) Muscular Wall
+        const septumGeo = new THREE.BoxGeometry(0.12, 0.72, 0.38);
+        const septumMat = new THREE.MeshStandardMaterial({
+          color: 0x881337,
+          roughness: 0.35,
+          metalness: 0.05,
+        });
+        const septumMesh = new THREE.Mesh(septumGeo, septumMat);
+        septumMesh.position.set(-0.05, -0.16, -0.05);
+        septumMesh.rotation.set(0.12, 0.16, 0.28);
+
+        // 2. Mitral Valve Fibrous Annulus & Leaflets
+        const valveRingMat = new THREE.MeshStandardMaterial({
+          color: 0xfef08a,
+          roughness: 0.2,
+          metalness: 0.25,
+          emissive: new THREE.Color(0xfef08a),
+          emissiveIntensity: 0.2,
+        });
+        const mitralGeo = new THREE.TorusGeometry(0.13, 0.016, 16, 32);
+        const mitralMesh = new THREE.Mesh(mitralGeo, valveRingMat);
+        mitralMesh.position.set(0.14, 0.18, -0.07);
+        mitralMesh.rotation.set(Math.PI / 2.6, 0.3, 0);
+
+        // 3. Tricuspid Valve Fibrous Annulus
+        const tricuspidGeo = new THREE.TorusGeometry(0.11, 0.015, 16, 32);
+        const tricuspidMesh = new THREE.Mesh(tricuspidGeo, valveRingMat);
+        tricuspidMesh.position.set(-0.25, 0.16, -0.04);
+        tricuspidMesh.rotation.set(Math.PI / 2.5, -0.2, 0);
+
+        // 4. Papillary Tendinous Chordae
+        const chordaeGroup = new THREE.Group();
+        const cordMat = new THREE.MeshStandardMaterial({ color: 0xfef9c3, roughness: 0.25 });
+        for (let i = 0; i < 6; i++) {
+          const cordGeo = new THREE.CylinderGeometry(0.0035, 0.0035, 0.22, 6);
+          const cord = new THREE.Mesh(cordGeo, cordMat);
+          const angle = (i / 6) * Math.PI * 2;
+          cord.position.set(0.14 + Math.cos(angle) * 0.07, 0.06, -0.07 + Math.sin(angle) * 0.06);
+          cord.rotation.set(0.1, 0, (Math.random() - 0.5) * 0.25);
+          chordaeGroup.add(cord);
+        }
+
+        // 5. Intracardiac Blood Volume Micro-Particles (Red in LV, Slate Blue in RV)
+        const chamberParticleCount = 90;
+        const chamberPos = new Float32Array(chamberParticleCount * 3);
+        for (let i = 0; i < chamberParticleCount; i++) {
+          const isLV = i < chamberParticleCount / 2;
+          chamberPos[i * 3] = isLV
+            ? 0.12 + (Math.random() - 0.5) * 0.22
+            : -0.24 + (Math.random() - 0.5) * 0.2;
+          chamberPos[i * 3 + 1] = -0.06 + (Math.random() - 0.5) * 0.45;
+          chamberPos[i * 3 + 2] = -0.06 + (Math.random() - 0.5) * 0.18;
+        }
+        const chamberGeo = new THREE.BufferGeometry();
+        chamberGeo.setAttribute("position", new THREE.BufferAttribute(chamberPos, 3));
+        const chamberMat = new THREE.PointsMaterial({
+          color: 0xef4444,
+          size: 0.02,
+          transparent: true,
+          opacity: 0.85,
+          blending: THREE.AdditiveBlending,
+        });
+        const chamberPoints = new THREE.Points(chamberGeo, chamberMat);
+
+        internalChamberGroup.add(
+          septumMesh,
+          mitralMesh,
+          tricuspidMesh,
+          chordaeGroup,
+          chamberPoints,
+        );
+        heartGroup.add(internalChamberGroup);
+
+        /* ---------- Deep Learning AI Neural Scan Holographic Assembly ---------- */
+        const aiScanGroup = new THREE.Group();
+        aiScanGroup.visible = false;
+
+        // Holographic Sweeping Plane
+        const scanGridGeo = new THREE.PlaneGeometry(1.6, 1.6, 20, 20);
+        const scanGridMat = new THREE.MeshBasicMaterial({
+          color: 0x06b6d4,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.38,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide,
+        });
+        const scanGridMesh = new THREE.Mesh(scanGridGeo, scanGridMat);
+        scanGridMesh.rotation.x = Math.PI / 2;
+
+        // AI Bounding Boxes (LV, Aortic Root, LAD)
+        const lvBoxGeo = new THREE.BoxGeometry(0.55, 0.75, 0.55);
+        const boxMat = new THREE.MeshBasicMaterial({
+          color: 0x10b981,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.45,
+        });
+        const lvBox = new THREE.Mesh(lvBoxGeo, boxMat);
+        lvBox.position.set(0.08, -0.15, 0.05);
+
+        const aortaBoxGeo = new THREE.BoxGeometry(0.45, 0.45, 0.35);
+        const aortaBoxMat = new THREE.MeshBasicMaterial({
+          color: 0xef4444,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.45,
+        });
+        const aortaBox = new THREE.Mesh(aortaBoxGeo, aortaBoxMat);
+        aortaBox.position.set(0.2, 0.75, -0.06);
+
+        aiScanGroup.add(scanGridMesh, lvBox, aortaBox);
+        heartGroup.add(aiScanGroup);
 
         /* ---------- 3D Stent Angioplasty Assembly (LAD Coronary Artery) ---------- */
         const stentGroup = new THREE.Group();
@@ -433,10 +710,9 @@ export function Heart3D({
         stentGroup.scale.set(0.001, 0.001, 0.001);
         stentGroup.visible = false;
 
-        // Precision Nitinol micro-lattice diamond stent
-        const stentGeo = new THREE.CylinderGeometry(0.040, 0.040, 0.20, 20, 14, true);
+        const stentGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.2, 20, 14, true);
         const stentMat = new THREE.MeshStandardMaterial({
-          color: 0xf59e0b, // Medical Platinum/Gold alloy
+          color: 0xf59e0b,
           roughness: 0.2,
           metalness: 0.98,
           wireframe: true,
@@ -445,7 +721,6 @@ export function Heart3D({
         });
         const stentMesh = new THREE.Mesh(stentGeo, stentMat);
 
-        // Angioplasty Balloon
         const balloonGeo = new THREE.CylinderGeometry(0.036, 0.036, 0.21, 18, 1, false);
         const balloonMat = new THREE.MeshPhysicalMaterial({
           color: 0xffffff,
@@ -457,7 +732,6 @@ export function Heart3D({
         });
         const balloonMesh = new THREE.Mesh(balloonGeo, balloonMat);
 
-        // Catheter Guidewire
         const wireGeo = new THREE.CylinderGeometry(0.006, 0.006, 0.55, 8);
         const wireMat = new THREE.MeshStandardMaterial({
           color: 0xa1a1aa,
@@ -466,7 +740,6 @@ export function Heart3D({
         });
         const wireMesh = new THREE.Mesh(wireGeo, wireMat);
 
-        // Accelerated oxygenated blood perfusion stream
         const streamCount = 50;
         const streamPos = new Float32Array(streamCount * 3);
         for (let i = 0; i < streamCount * 3; i += 3) {
@@ -488,7 +761,7 @@ export function Heart3D({
         stentGroup.add(wireMesh, balloonMesh, stentMesh, streamPoints);
         heartGroup.add(stentGroup);
 
-        /* ---------- Luminescent Halo Orbit Ring ---------- */
+        /* ---------- Luminescent Orbit Ring & Ambient Perfusion Particles ---------- */
         const ringGeo = new THREE.TorusGeometry(0.92, 0.006, 16, 96);
         const ringMat = new THREE.MeshBasicMaterial({
           color: 0x38bdf8,
@@ -509,7 +782,6 @@ export function Heart3D({
         const outerOrbitRing = new THREE.Mesh(outerRingGeo, outerRingMat);
         orbitRing.add(outerOrbitRing);
 
-        /* ---------- Floating Hemodynamic Perfusion Micro-Particles ---------- */
         const particleCount = 110;
         const particlePos = new Float32Array(particleCount * 3);
         for (let i = 0; i < particleCount * 3; i += 3) {
@@ -535,7 +807,7 @@ export function Heart3D({
         rootGroup.add(heartGroup, orbitRing, particles);
         scene.add(rootGroup);
 
-        /* ---------- Responsive Viewport Sizing ---------- */
+        /* ---------- Viewport Sizing ---------- */
         let baseCameraZ = 1.0;
         const resize = () => {
           const w = Math.max(1, root.clientWidth);
@@ -554,7 +826,7 @@ export function Heart3D({
         const ro = new ResizeObserver(resize);
         ro.observe(root);
 
-        /* ---------- Unconstrained 360° Drag & Smooth Orbit Inertia ---------- */
+        /* ---------- 360° Drag & Smooth Orbit Inertia ---------- */
         let dragging = false;
         let lastX = 0;
         let lastY = 0;
@@ -599,32 +871,64 @@ export function Heart3D({
 
         /* ---------- High-Performance Animation Loop ---------- */
         const bump = (x: number, c: number, w: number) => Math.exp(-(((x - c) / w) ** 2));
-        let lastMode: HeartMode = "real";
+        let lastMode: string = "";
         const t0 = performance.now();
         let frameCount = 0;
         const tempVec = new THREE.Vector3();
+
+        // Heartbeat Sound Trigger State
+        let hasPlayedLubInCycle = false;
+        let hasPlayedDubInCycle = false;
 
         const frame = () => {
           const t = (performance.now() - t0) / 1000;
           const currentMode = modeRef.current;
 
-          // Material Switcher
+          // Material & Mode Switcher
           if (currentMode !== lastMode) {
             lastMode = currentMode;
             if (currentMode === "real") {
-              bodyMesh.material = realBodyMat;
-              arteriesMesh.material = realTubeMat;
+              bodyMesh.material = realBodyMat as any;
+              arteriesMesh.material = realTubeMat as any;
+              realBodyMat.clippingPlanes = [];
+              realTubeMat.clippingPlanes = [];
+              realBodyMat.needsUpdate = true;
+              realTubeMat.needsUpdate = true;
+              internalChamberGroup.visible = false;
               rimLight.color.setHex(0x38bdf8);
               keyLight.intensity = 3.4;
+            } else if (currentMode === "internal") {
+              bodyMesh.material = realBodyMat as any;
+              arteriesMesh.material = realTubeMat as any;
+              realBodyMat.clippingPlanes = [coronalClipPlane];
+              realTubeMat.clippingPlanes = [coronalClipPlane];
+              realBodyMat.needsUpdate = true;
+              realTubeMat.needsUpdate = true;
+              internalChamberGroup.visible = true;
+              rimLight.color.setHex(0x38bdf8);
+              keyLight.intensity = 3.6;
             } else {
-              bodyMesh.material = etchingBodyMat;
-              arteriesMesh.material = etchingTubeMat;
+              // Gray's Anatomy Reference Engraving
+              bodyMesh.material = etchingBodyMat as any;
+              arteriesMesh.material = etchingTubeMat as any;
+              etchingBodyMat.clippingPlanes = [];
+              etchingTubeMat.clippingPlanes = [];
+              etchingBodyMat.needsUpdate = true;
+              etchingTubeMat.needsUpdate = true;
+              internalChamberGroup.visible = false;
               rimLight.color.setHex(0xffffff);
               keyLight.intensity = 3.0;
             }
           }
 
-          // Luminescent Halo Orbit Ring & Ambient Perfusion Float
+          // Deep Learning AI Scan Hologram
+          aiScanGroup.visible = aiScanRef.current;
+          if (aiScanRef.current) {
+            scanGridMesh.position.y = Math.sin(t * 2.2) * 0.65;
+            scanGridMesh.rotation.z = t * 0.15;
+          }
+
+          // Halo Orbit Ring & Micro-Particles
           orbitRing.rotation.z = t * 0.18;
           particles.rotation.y = t * 0.08;
 
@@ -632,8 +936,26 @@ export function Heart3D({
           const currentBpm = bpmRef.current;
           const beatDuration = 60 / currentBpm;
           const phase = (t % beatDuration) / beatDuration;
-          // Lub (Systole) + Dub (Diastole)
           const beat = reduce ? 0 : bump(phase, 0.11, 0.05) + 0.65 * bump(phase, 0.35, 0.065);
+
+          // Auscultation Acoustic Heartbeat Sound Synchronization
+          if (audioSynthRef.current) {
+            // S1 (Lub) Trigger at phase ~0.11
+            if (phase >= 0.09 && phase < 0.22 && !hasPlayedLubInCycle) {
+              audioSynthRef.current.playLub();
+              hasPlayedLubInCycle = true;
+            } else if (phase >= 0.22 && hasPlayedLubInCycle) {
+              hasPlayedLubInCycle = false;
+            }
+
+            // S2 (Dub) Trigger at phase ~0.35
+            if (phase >= 0.33 && phase < 0.46 && !hasPlayedDubInCycle) {
+              audioSynthRef.current.playDub();
+              hasPlayedDubInCycle = true;
+            } else if ((phase < 0.33 || phase >= 0.46) && hasPlayedDubInCycle) {
+              hasPlayedDubInCycle = false;
+            }
+          }
 
           // Stent Angioplasty Deployment
           if (isStentDeployedRef.current) {
@@ -649,7 +971,6 @@ export function Heart3D({
               1.0,
               Math.sin(stentProgressRef.current * Math.PI) * 1.1 + 0.9,
             );
-            // Particle blood perfusion rush
             const pArr = streamGeo.attributes.position.array as Float32Array;
             for (let i = 1; i < streamCount * 3; i += 3) {
               pArr[i] -= 0.016;
@@ -666,7 +987,7 @@ export function Heart3D({
             }
           }
 
-          // Smooth 360° Rotation Kinematics
+          // Rotation Kinematics
           if (targetRotRef.current) {
             rotY += (targetRotRef.current.y - rotY) * 0.08;
             rotX += (targetRotRef.current.x - rotX) * 0.08;
@@ -683,31 +1004,34 @@ export function Heart3D({
             velY *= 0.92;
           }
 
-          heartGroup.rotation.set(rotX, rotY, 0);
+          // Physiological helical systolic twist (apical cardiac torsion)
+          const systolicTwist = Math.sin(phase * Math.PI * 2) * 0.038 * beat;
+          heartGroup.rotation.set(rotX + systolicTwist * 0.5, rotY + systolicTwist, systolicTwist * 0.7);
 
-          // Subtle levitation drift
+          // Levitation drift & cardiac systolic contraction
           rootGroup.position.y = Math.sin(t * 1.2) * 0.018;
-
-          // Living Ventricular Myocardial Contraction & Systolic Torsion
-          const scaleMultiplier = 1 + 0.035 * beat;
+          const scaleMultiplier = 1 + 0.038 * beat;
           heartGroup.scale.set(
-            scaleMultiplier,
-            scaleMultiplier * (1 - 0.008 * beat),
-            scaleMultiplier,
+            scaleMultiplier * (1 + 0.006 * beat),
+            scaleMultiplier * (1 - 0.016 * beat),
+            scaleMultiplier * (1 + 0.008 * beat),
           );
           realTubeMat.emissiveIntensity = 0.35 + 0.7 * beat;
           etchingTubeMat.emissiveIntensity = 0.28 + 0.65 * beat;
 
-          // Smooth Camera Zoom
+          // Camera Zoom
           const targetZ = baseCameraZ / targetZoomRef.current;
           camera.position.z += (targetZ - camera.position.z) * 0.1;
 
-          // Project 3D Hotspot Pins to 2D Screen
+          // Hotspot 2D Screen Projection
           frameCount++;
           if (frameCount % 2 === 0 && showPinsRef.current) {
             const w = root.clientWidth;
             const h = root.clientHeight;
-            const projected = ANATOMICAL_HOTSPOTS.map((spot) => {
+            const activeSpots = ANATOMICAL_HOTSPOTS.filter(
+              (spot) => currentMode === "internal" || !spot.isInternal,
+            );
+            const projected = activeSpots.map((spot) => {
               tempVec.set(spot.pos[0], spot.pos[1], spot.pos[2]);
               tempVec.applyEuler(heartGroup.rotation);
               tempVec.add(rootGroup.position);
@@ -738,12 +1062,12 @@ export function Heart3D({
         io.observe(root);
 
         frame();
-        if (!cancelled) setIsReady(true);
+        setIsReady(true);
 
         cleanup = () => {
-          renderer.setAnimationLoop(null);
           io.disconnect();
           ro.disconnect();
+          renderer.setAnimationLoop(null);
           canvas.removeEventListener("pointerdown", onDown);
           canvas.removeEventListener("pointermove", onMove);
           canvas.removeEventListener("pointerup", onUp);
@@ -757,6 +1081,10 @@ export function Heart3D({
           ringGeo.dispose();
           outerRingGeo.dispose();
           particleGeo.dispose();
+          septumGeo.dispose();
+          mitralGeo.dispose();
+          tricuspidGeo.dispose();
+          scanGridGeo.dispose();
           realBodyMat.dispose();
           realTubeMat.dispose();
           etchingBodyMat.dispose();
@@ -769,6 +1097,7 @@ export function Heart3D({
           outerRingMat.dispose();
           particleMat.dispose();
           renderer.dispose();
+          audioSynthRef.current?.dispose();
         };
       } catch (err) {
         console.warn("Heart3D initialization error:", err);
@@ -785,7 +1114,7 @@ export function Heart3D({
   const handleSelectHotspot = useCallback((spot: Hotspot) => {
     setActiveHotspot(spot);
     targetRotRef.current = { x: spot.targetRot[0], y: spot.targetRot[1] };
-    targetZoomRef.current = 1.35;
+    targetZoomRef.current = spot.isInternal ? 1.5 : 1.35;
   }, []);
 
   // Action: Reset View
@@ -796,26 +1125,39 @@ export function Heart3D({
   }, []);
 
   // Action: 360° Viewing Presets
-  const handlePresetAngle = useCallback((angle: "front" | "back" | "left" | "right" | "arch") => {
-    setActiveHotspot(null);
-    switch (angle) {
-      case "front":
-        targetRotRef.current = { x: 0.05, y: -0.32 };
-        break;
-      case "back":
-        targetRotRef.current = { x: 0.05, y: Math.PI - 0.32 };
-        break;
-      case "left":
-        targetRotRef.current = { x: 0.08, y: Math.PI / 2 };
-        break;
-      case "right":
-        targetRotRef.current = { x: 0.08, y: -Math.PI / 2 };
-        break;
-      case "arch":
-        targetRotRef.current = { x: 0.95, y: -0.15 };
-        break;
-    }
-  }, []);
+  const handlePresetAngle = useCallback(
+    (angle: "front" | "back" | "left" | "right" | "arch" | "coronal") => {
+      setActiveHotspot(null);
+      switch (angle) {
+        case "front":
+          targetRotRef.current = { x: 0.05, y: -0.32 };
+          targetZoomRef.current = 1.0;
+          break;
+        case "back":
+          targetRotRef.current = { x: 0.05, y: Math.PI - 0.32 };
+          targetZoomRef.current = 1.0;
+          break;
+        case "left":
+          targetRotRef.current = { x: 0.08, y: Math.PI / 2 };
+          targetZoomRef.current = 1.1;
+          break;
+        case "right":
+          targetRotRef.current = { x: 0.08, y: -Math.PI / 2 };
+          targetZoomRef.current = 1.1;
+          break;
+        case "arch":
+          targetRotRef.current = { x: 0.95, y: -0.15 };
+          targetZoomRef.current = 1.25;
+          break;
+        case "coronal":
+          setMode("internal");
+          targetRotRef.current = { x: 0.05, y: 0.0 };
+          targetZoomRef.current = 1.35;
+          break;
+      }
+    },
+    [],
+  );
 
   // Action: Stent Angioplasty Simulation
   const handleToggleStent = useCallback(() => {
@@ -834,58 +1176,153 @@ export function Heart3D({
       ref={rootRef}
       className={`relative select-none overflow-hidden rounded-3xl bg-white shadow-[0_24px_70px_-15px_rgba(16,42,67,0.14)] border border-slate-200/90 ${className}`}
     >
-      {/* ---------- Ultra-Premium Header Bar ---------- */}
-      <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-white/95 px-5 py-4 backdrop-blur-md sm:px-7">
-        {/* Left Clinical Title & Status */}
+      {/* ---------- Ultra-Premium Clinical Toolbar ---------- */}
+      <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-white/95 px-5 py-3.5 backdrop-blur-md sm:px-7">
+        {/* Left Title & Status */}
         <div className="flex flex-col">
           <div className="flex items-center gap-2.5">
             <span className="relative flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
               <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-600" />
             </span>
-            <h3 className="font-mono text-xs font-bold tracking-wider text-slate-800 sm:text-sm uppercase">
-              Anatomical 3D Vasculature Model
+            <h3 className="text-xs font-bold tracking-wider text-slate-800 sm:text-sm uppercase">
+              3D Cardiac Vasculature & Chamber Simulator
             </h3>
-            <span className="rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-[10px] font-semibold text-red-600 sm:text-[11px]">
-              {mode === "real" ? "Living Anatomy 3D" : "Gray's Anatomy Etching"}
+            <span
+              className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold sm:text-[11px] ${
+                mode === "engraving"
+                  ? "border-rose-300 bg-rose-50 text-rose-700 shadow-sm"
+                  : mode === "internal"
+                    ? "border-cyan-200 bg-cyan-50 text-cyan-700"
+                    : "border-red-200 bg-red-50 text-red-600"
+              }`}
+            >
+              {mode === "engraving"
+                ? "Classical Illustrated 3D (Reference Style)"
+                : mode === "internal"
+                  ? "Internal 4-Chamber Coronal View"
+                  : "Living External 3D"}
             </span>
           </div>
-          <span className="mt-1 font-mono text-[9.5px] font-semibold tracking-widest text-slate-400 uppercase">
-            Physiological Cardiac Cycle & Coronary Angioplasty
+          <span className="mt-0.5 text-[10px] font-medium tracking-wide text-slate-400">
+            Hand-Crafted Copperplate Etching · Real-Time Cardiac Torsion · Physiological S1/S2 Auscultation
           </span>
         </div>
 
         {/* Right Toolbar Controls */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Real Human 3D Mode */}
+          {/* 1. Mode Switchers: Reference Illustration vs Internal vs Living Medical */}
+          <div className="flex items-center rounded-full border border-slate-200/90 bg-slate-100/80 p-1">
+            <button
+              type="button"
+              onClick={() => setMode("engraving")}
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all ${
+                mode === "engraving"
+                  ? "bg-[#c93b33] text-white shadow-sm shadow-red-600/30"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+              title="Classic Gray's Anatomy copperplate medical etching (matches reference illustration)"
+            >
+              <span>🎨</span>
+              <span>Illustration 3D</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setMode("internal")}
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
+                mode === "internal"
+                  ? "bg-cyan-700 text-white shadow-sm shadow-cyan-700/30"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+              title="Internal 4-chamber cross-section (Left & Right Ventricles, Septum, Valves)"
+            >
+              <span>🔬</span>
+              <span>4-Chamber View</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setMode("real")}
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all ${
+                mode === "real"
+                  ? "bg-red-600 text-white shadow-sm shadow-red-600/30"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+              title="Living photorealistic human myocardial anatomy"
+            >
+              <span>🫀</span>
+              <span className="hidden sm:inline">Living 3D</span>
+            </button>
+          </div>
+
+          {/* 2. Deep Learning AI Neural Scan Toggle */}
           <button
             type="button"
-            onClick={() => setMode("real")}
-            className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
-              mode === "real"
-                ? "bg-red-600 text-white shadow-md shadow-red-600/30"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            onClick={() => setAiScanActive(!aiScanActive)}
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+              aiScanActive
+                ? "border-cyan-400 bg-cyan-500 text-white shadow-sm shadow-cyan-500/30"
+                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
             }`}
+            title="Toggle Deep Learning AI cardiac segmentation & holographic scanner"
           >
-            <span>🫀</span>
-            <span>Real Human 3D</span>
+            <span className="relative flex h-2 w-2">
+              {aiScanActive && (
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-200 opacity-75" />
+              )}
+              <span
+                className={`relative inline-flex h-2 w-2 rounded-full ${
+                  aiScanActive ? "bg-white" : "bg-cyan-500"
+                }`}
+              />
+            </span>
+            <span>AI Neural Scan</span>
           </button>
 
-          {/* Gray's Anatomy Reference Engraving Mode */}
+          {/* 3. Physiological Heartbeat Sound (Mute/Unmute) */}
           <button
             type="button"
-            onClick={() => setMode("engraving")}
-            className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all ${
-              mode === "engraving"
-                ? "bg-[#b34728] text-white shadow-md shadow-[#b34728]/30"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            onClick={() => setIsMuted(!isMuted)}
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+              !isMuted
+                ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm"
+                : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-800"
             }`}
+            title={
+              isMuted
+                ? "Auscultation Sound Muted (Click to play realistic Lub-Dub heartbeat)"
+                : "Auscultation Sound Active (Click to mute)"
+            }
           >
-            <span>📖</span>
-            <span>Gray&apos;s Etching</span>
+            {!isMuted ? (
+              <>
+                <svg className="h-3.5 w-3.5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                </svg>
+                {/* Animated EQ soundwave bars */}
+                <span className="flex items-end gap-0.5 h-3">
+                  <span className="w-0.5 bg-emerald-600 rounded-full animate-bounce h-2" />
+                  <span className="w-0.5 bg-emerald-600 rounded-full animate-bounce h-3 delay-75" />
+                  <span className="w-0.5 bg-emerald-600 rounded-full animate-bounce h-1.5 delay-150" />
+                </span>
+                <span>Sound On</span>
+              </>
+            ) : (
+              <>
+                <svg className="h-3.5 w-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <line x1="23" y1="9" x2="17" y2="15" />
+                  <line x1="17" y1="9" x2="23" y2="15" />
+                </svg>
+                <span>Sound Muted</span>
+              </>
+            )}
           </button>
 
-          {/* Deploy Stent Action Button */}
+          {/* 4. Deploy Stent Action */}
           <button
             type="button"
             onClick={handleToggleStent}
@@ -901,7 +1338,7 @@ export function Heart3D({
             <span>{isStentDeployed ? "Reset Stent" : "Deploy Stent"}</span>
           </button>
 
-          {/* Pins Toggle */}
+          {/* 5. Pins Toggle */}
           <button
             type="button"
             onClick={() => setShowPins(!showPins)}
@@ -919,7 +1356,7 @@ export function Heart3D({
             <span>Pins</span>
           </button>
 
-          {/* Reset View Button */}
+          {/* 6. Reset View */}
           <button
             type="button"
             onClick={handleReset}
@@ -935,13 +1372,32 @@ export function Heart3D({
       </div>
 
       {/* ---------- 3D Viewport ---------- */}
-      <div className="relative aspect-[4/3] w-full min-h-[480px] sm:min-h-[540px] lg:min-h-[590px] bg-[radial-gradient(ellipse_at_center,#ffffff_0%,#f8fafc_60%,#eef2f6_100%)] overflow-hidden">
-        {/* Fallback while compiling */}
+      <div className="relative aspect-[4/3] w-full min-h-[490px] sm:min-h-[550px] lg:min-h-[610px] bg-[radial-gradient(ellipse_at_center,#ffffff_0%,#f8fafc_60%,#eef2f6_100%)] overflow-hidden">
+        {/* Fallback while compiling / initializing */}
         <div
           style={{ opacity: isReady ? 0 : 1, pointerEvents: isReady ? "none" : "auto" }}
-          className="absolute inset-0 transition-opacity duration-700"
+          className="absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-700 bg-[radial-gradient(ellipse_at_center,#ffffff_0%,#f8fafc_60%,#eef2f6_100%)]"
         >
-          {children}
+          {children || (
+            <div className="flex flex-col items-center gap-3">
+              <div className="relative flex h-14 w-14 items-center justify-center">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60" />
+                <span className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-tr from-red-600 to-rose-500 shadow-lg shadow-red-500/30 text-white">
+                  <svg className="h-6 w-6 animate-pulse" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-1 text-center">
+                <span className="text-xs font-bold tracking-widest text-slate-800 uppercase">
+                  Rendering 3D Cardiac Anatomy
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  Generating real-time coronary &amp; chamber vasculature...
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* WebGL Canvas */}
@@ -952,9 +1408,9 @@ export function Heart3D({
           className="absolute inset-0 h-full w-full transition-opacity duration-700"
         />
 
-        {/* 360° Anatomical Angle Presets (Top Left Quick Switch) */}
+        {/* 360° Anatomical Angle Presets */}
         <div className="pointer-events-auto absolute left-4 top-4 z-30 hidden sm:flex items-center gap-1 rounded-full border border-slate-200/90 bg-white/90 p-1 text-[10.5px] font-semibold text-slate-700 shadow-sm backdrop-blur-md">
-          <span className="px-2 font-mono text-[9px] uppercase tracking-wider text-slate-400">Angle:</span>
+          <span className="px-2 text-[9px] uppercase tracking-wider text-slate-400">Angle:</span>
           <button
             type="button"
             onClick={() => handlePresetAngle("front")}
@@ -964,33 +1420,116 @@ export function Heart3D({
           </button>
           <button
             type="button"
-            onClick={() => handlePresetAngle("back")}
-            className="rounded-full px-2.5 py-1 transition-colors hover:bg-slate-100 hover:text-slate-900"
+            onClick={() => handlePresetAngle("coronal")}
+            className="rounded-full px-2.5 py-1 text-cyan-700 font-bold hover:bg-cyan-50"
           >
-            Back
-          </button>
-          <button
-            type="button"
-            onClick={() => handlePresetAngle("left")}
-            className="rounded-full px-2.5 py-1 transition-colors hover:bg-slate-100 hover:text-slate-900"
-          >
-            Left
-          </button>
-          <button
-            type="button"
-            onClick={() => handlePresetAngle("right")}
-            className="rounded-full px-2.5 py-1 transition-colors hover:bg-slate-100 hover:text-slate-900"
-          >
-            Right
+            Coronal Cut
           </button>
           <button
             type="button"
             onClick={() => handlePresetAngle("arch")}
             className="rounded-full px-2.5 py-1 transition-colors hover:bg-slate-100 hover:text-slate-900"
           >
-            Arch
+            Aortic Arch
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePresetAngle("left")}
+            className="rounded-full px-2.5 py-1 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          >
+            Left LV
+          </button>
+          <button
+            type="button"
+            onClick={() => handlePresetAngle("back")}
+            className="rounded-full px-2.5 py-1 transition-colors hover:bg-slate-100 hover:text-slate-900"
+          >
+            Posterior
           </button>
         </div>
+
+        {/* Deep Learning AI Neural Scan Hologram HUD Overlay */}
+        {aiScanActive && (
+          <div className="pointer-events-none absolute inset-0 z-20 flex flex-col justify-between p-4 sm:p-6 animate-in fade-in duration-300">
+            {/* Top Scanning Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 rounded-xl border border-cyan-400/40 bg-slate-950/85 px-3.5 py-2 text-cyan-300 shadow-lg backdrop-blur-md">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-cyan-500" />
+                </span>
+                <span className="text-[11px] font-bold tracking-wider uppercase">
+                  AI Deep Learning: CardioVision-ResNet (v5.2)
+                </span>
+                <span className="rounded bg-cyan-950 px-1.5 py-0.5 text-[9.5px] font-mono text-cyan-400 border border-cyan-800">
+                  Inference: 12ms · 60 FPS
+                </span>
+              </div>
+              <div className="hidden sm:flex items-center gap-1.5 rounded-xl border border-emerald-400/40 bg-slate-950/85 px-3 py-2 text-[10.5px] font-semibold text-emerald-400 shadow-lg backdrop-blur-md">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span>0 Stenosis · Normal Perfusion Index</span>
+              </div>
+            </div>
+
+            {/* Middle Left & Right Telemetry Panels */}
+            <div className="flex items-center justify-between">
+              {/* Left AI Hemodynamics */}
+              <div className="hidden sm:flex flex-col gap-2 rounded-2xl border border-cyan-500/30 bg-slate-950/80 p-3.5 text-xs text-white shadow-xl backdrop-blur-md">
+                <div className="flex items-center justify-between gap-4 border-b border-cyan-900/60 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-cyan-400">
+                  <span>AI Hemodynamics</span>
+                  <span>Normal Range</span>
+                </div>
+                <div className="flex items-center justify-between gap-6">
+                  <span className="text-slate-300">LVEF (Ejection Fraction):</span>
+                  <span className="font-bold text-emerald-400">62.8% [55-70%]</span>
+                </div>
+                <div className="flex items-center justify-between gap-6">
+                  <span className="text-slate-300">Stroke Volume:</span>
+                  <span className="font-bold text-cyan-300">76 mL</span>
+                </div>
+                <div className="flex items-center justify-between gap-6">
+                  <span className="text-slate-300">Cardiac Output (CO):</span>
+                  <span className="font-bold text-cyan-300">5.4 L/min</span>
+                </div>
+                <div className="flex items-center justify-between gap-6">
+                  <span className="text-slate-300">Myocardial GLS Strain:</span>
+                  <span className="font-bold text-emerald-400">-19.2%</span>
+                </div>
+              </div>
+
+              {/* Right AI Chamber Neural Segmentation */}
+              <div className="hidden md:flex flex-col gap-2 rounded-2xl border border-cyan-500/30 bg-slate-950/80 p-3.5 text-xs text-white shadow-xl backdrop-blur-md">
+                <div className="flex items-center justify-between gap-4 border-b border-cyan-900/60 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-cyan-400">
+                  <span>Chamber Neural Segmentation</span>
+                  <span>Confidence</span>
+                </div>
+                <div className="flex items-center justify-between gap-6">
+                  <span className="text-slate-300">Left Ventricle (LV Cavity):</span>
+                  <span className="font-bold text-emerald-400">99.6%</span>
+                </div>
+                <div className="flex items-center justify-between gap-6">
+                  <span className="text-slate-300">Right Ventricle (RV Cavity):</span>
+                  <span className="font-bold text-emerald-400">98.9%</span>
+                </div>
+                <div className="flex items-center justify-between gap-6">
+                  <span className="text-slate-300">Aortic Root / Arch:</span>
+                  <span className="font-bold text-cyan-300">99.3%</span>
+                </div>
+                <div className="flex items-center justify-between gap-6">
+                  <span className="text-slate-300">LAD Coronary Bed:</span>
+                  <span className="font-bold text-cyan-300">98.4%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Cybernetic Sweep Status */}
+            <div className="flex items-center justify-center">
+              <span className="rounded-full border border-cyan-400/50 bg-slate-950/90 px-4 py-1 text-[10.5px] font-mono tracking-wider text-cyan-300 shadow-md">
+                3D VOXEL CLOUD RECONSTRUCTION · 60 FPS REAL-TIME SYNC
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Live Interactive 3D Landmark Pins */}
         {showPins &&
@@ -1014,11 +1553,25 @@ export function Heart3D({
                   aria-label={spot.name}
                   className="group relative flex items-center justify-center focus:outline-none"
                 >
-                  <span className="absolute h-7 w-7 rounded-full border border-red-400/50 bg-red-400/20 transition-transform group-hover:scale-125" />
-                  <span className="absolute h-5 w-5 rounded-full border border-red-500/70 bg-red-500/25 animate-ping opacity-60" />
+                  <span
+                    className={`absolute h-7 w-7 rounded-full border transition-transform group-hover:scale-125 ${
+                      spot.isInternal
+                        ? "border-cyan-400/50 bg-cyan-400/20"
+                        : "border-red-400/50 bg-red-400/20"
+                    }`}
+                  />
+                  <span
+                    className={`absolute h-5 w-5 rounded-full animate-ping opacity-60 ${
+                      spot.isInternal ? "bg-cyan-500/30" : "bg-red-500/25"
+                    }`}
+                  />
                   <span
                     className={`relative h-2.5 w-2.5 rounded-full border border-white transition-all ${
-                      isSelected ? "bg-red-600 scale-125 shadow-md shadow-red-600/50" : "bg-white shadow-sm"
+                      isSelected
+                        ? spot.isInternal
+                          ? "bg-cyan-500 scale-125 shadow-md shadow-cyan-500/50"
+                          : "bg-red-600 scale-125 shadow-md shadow-red-600/50"
+                        : "bg-white shadow-sm"
                     }`}
                   />
                   <span className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900/90 px-2 py-0.5 text-[10px] font-medium text-white opacity-0 shadow transition-opacity group-hover:opacity-100">
@@ -1033,7 +1586,13 @@ export function Heart3D({
         {activeHotspot && (
           <div className="absolute right-5 top-5 z-40 max-w-xs animate-in fade-in slide-in-from-top-2 rounded-2xl border border-slate-200/90 bg-white/95 p-4 text-left shadow-xl backdrop-blur-md">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <span className="rounded-full bg-red-50 px-2 py-0.5 font-mono text-[9.5px] font-bold text-red-600 uppercase">
+              <span
+                className={`rounded-full px-2 py-0.5 text-[9.5px] font-bold uppercase ${
+                  activeHotspot.isInternal
+                    ? "bg-cyan-50 text-cyan-700 border border-cyan-200"
+                    : "bg-red-50 text-red-600 border border-red-200"
+                }`}
+              >
                 {activeHotspot.tag}
               </span>
               <button
@@ -1067,7 +1626,11 @@ export function Heart3D({
         <div className="pointer-events-none absolute bottom-4 left-5 z-20">
           <div className="flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3.5 py-1.5 text-[11px] font-medium text-slate-600 shadow-sm backdrop-blur-md">
             <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-            <span>Drag 360° to inspect • Click pins for anatomical details</span>
+            <span>
+              {mode === "internal"
+                ? "Coronal cutaway active: Inspecting 4 internal chambers & valves"
+                : "Drag 360° to inspect • Switch to Internal View or AI Neural Scan"}
+            </span>
           </div>
         </div>
       </div>
@@ -1075,7 +1638,7 @@ export function Heart3D({
       {/* ---------- Telemetry Strip ---------- */}
       <div className="relative z-20 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 bg-white px-5 py-4 sm:px-7">
         {/* Left Vital Stats */}
-        <div className="flex flex-wrap items-center gap-5 text-xs font-mono">
+        <div className="flex flex-wrap items-center gap-5 text-xs">
           <div className="flex items-center gap-2">
             <svg className="h-4 w-4 text-red-600 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
@@ -1105,7 +1668,7 @@ export function Heart3D({
         </div>
 
         {/* Right Set BPM Controls */}
-        <div className="flex items-center gap-2 text-xs font-mono">
+        <div className="flex items-center gap-2 text-xs">
           <span className="font-bold text-slate-400 uppercase">Set BPM:</span>
           {[60, 72, 98, 115].map((val) => (
             <button
