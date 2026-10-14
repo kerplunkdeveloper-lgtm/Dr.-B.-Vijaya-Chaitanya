@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { HERO_STATS, JOURNEY, SITE } from "@/lib/site";
+import { HERO_STATS, SITE } from "@/lib/site";
 import { BuildingHeartIcon, HeartPulseIcon } from "../icons";
 import { IntroVideo } from "../IntroVideo";
 import { ButtonLink } from "../ui";
@@ -23,7 +23,7 @@ export function Hero() {
         id="home"
         data-nav="home"
         aria-labelledby="hero-title"
-        className="relative isolate overflow-hidden bg-white pt-(--header-h) lg:flex lg:h-[clamp(640px,100svh,920px)] lg:items-stretch lg:pt-0"
+        className="relative isolate overflow-hidden bg-white pt-(--header-h) lg:flex lg:h-[clamp(680px,100svh,950px)] lg:items-stretch lg:pt-0"
       >
         {/* soft clinical backdrop */}
         <div aria-hidden className="absolute inset-0 -z-10">
@@ -33,20 +33,20 @@ export function Hero() {
           <div className="absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-white to-transparent" />
         </div>
 
-        <div className="container-x flex flex-col lg:grid lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:items-stretch lg:gap-6">
+        <div className="container-x flex flex-col lg:grid lg:grid-cols-[minmax(0,1.06fr)_minmax(0,0.94fr)] lg:items-center lg:gap-8 xl:gap-12">
           {/* ---------- Visual: portrait + heart (first on mobile, right column on desktop) ---------- */}
-          <div className="relative order-first -mx-5 h-85 sm:mx-0 sm:h-110 lg:order-last lg:h-auto lg:min-h-0">
+          <div className="relative order-first -mx-5 h-96 sm:mx-0 sm:h-[480px] lg:order-last lg:h-[clamp(620px,86vh,840px)] lg:min-h-0">
             <div
               aria-hidden
               data-pointer="-8"
-              className="absolute inset-x-[10%] bottom-0 top-[6%] rounded-t-[999px] bg-linear-to-b from-[#d3ece9] via-mist to-white sm:inset-x-[16%] lg:inset-x-[8%] lg:top-[calc(var(--header-h)+1.25rem)] xl:inset-x-[12%]"
+              className="absolute inset-x-[10%] bottom-0 top-[4%] rounded-t-[999px] bg-linear-to-b from-[#d3ece9] via-mist to-white sm:inset-x-[16%] lg:inset-x-[6%] lg:top-[calc(var(--header-h)+0.5rem)] xl:inset-x-[10%]"
             />
 
 
             <div
               data-hero="portrait"
               data-parallax-hero="6"
-              className="absolute inset-x-0 bottom-0 top-0 sm:inset-x-[8%] lg:inset-x-0 lg:top-[calc(var(--header-h)+0.5rem)]"
+              className="absolute inset-x-0 bottom-0 top-0 sm:inset-x-[6%] lg:inset-x-0 lg:top-[calc(var(--header-h)-0.25rem)]"
             >
               <div data-pointer="10" className="absolute inset-0">
                 <Image
@@ -65,47 +65,37 @@ export function Hero() {
           </div>
 
           {/* ---------- Copy ---------- */}
-          <div className="relative z-10 flex flex-col justify-center pb-6 pt-4 lg:py-[calc(var(--header-h)+1.5rem)]">
+          <div className="relative z-10 flex flex-col justify-center pb-8 pt-4 lg:py-[calc(var(--header-h)+1.5rem)]">
             <div>
-             
-              <h1
-                id="hero-title"
-                className="display mt-4 text-[clamp(2.4rem,min(4.7vw,7.6vh),5.75rem)] leading-[1.05] text-ink lg:mt-5"
-              >
-                <span className="sr-only">
-                  Dr. B. Vijaya Chaitanya, interventional cardiologist in Vijayawada:{" "}
-                </span>
-              
-              </h1>
+              <div data-hero="meta" className="mt-2 lg:mt-0">
+                <h1
+                  id="hero-title"
+                  className="text-[clamp(2rem,3vw,3.15rem)] font-bold tracking-tight text-primary leading-[1.18]"
+                >
+                  Dr. Borra Vijaya Chaitanya
+                </h1>
+                <p className="mt-2.5 text-[16.5px] sm:text-[18px] lg:text-[19px] font-medium tracking-wide text-secondary-deep">
+                  MD., DM (Cardio) FACC, FIC
+                </p>
 
-              <div data-hero="meta" className="mt-6 lg:mt-[clamp(1.25rem,3.2vh,2rem)]">
-                <p className="text-[44px] font-medium tracking-[-0.005em] text-ink">{SITE.name}</p>
-                {/* Degree pills */}
-                <div className="mt-2.5 flex flex-wrap gap-1.5">
-                  {JOURNEY.filter((j) => j.kind === "degree").map((j) => (
-                    <span
-                      key={j.title}
-                      className="inline-flex items-center  px-3 py-1 text-[12px] font-medium tracking-wide text-secondary-deep"
-                    >
-                      {j.title}
-                    </span>
-                  ))}
-                </div>
-                <ul className="mt-3 space-y-1 text-[18px] font-light leading-relaxed text-slate">
+                <ul className="mt-5 space-y-2 text-[16px] sm:text-[17.5px] font-normal leading-relaxed text-slate">
                   {SITE.titles.map((t) => (
-                    <li key={t}>{t}</li>
+                    <li key={t} className="flex items-center gap-2.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-secondary shrink-0" aria-hidden />
+                      <span>{t}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="mt-7 flex flex-col items-start gap-5 lg:mt-[clamp(1.25rem,3.4vh,2.25rem)]">
-                <div data-hero="cta">
-                  <IntroVideo embedUrl={SITE.introVideoEmbedUrl} />
-                </div>
-                <div data-hero="cta" className="w-full max-w-[320px] sm:w-67">
-                  <ButtonLink href="#contact" className="w-full">
+              <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-6">
+                <div data-hero="cta" className="w-full sm:w-auto">
+                  <ButtonLink href="#contact" className="w-full sm:w-auto px-7 py-3.5">
                     Book Appointment
                   </ButtonLink>
+                </div>
+                <div data-hero="cta">
+                  <IntroVideo embedUrl={SITE.introVideoEmbedUrl} />
                 </div>
               </div>
 

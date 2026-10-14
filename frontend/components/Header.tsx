@@ -107,33 +107,32 @@ export function Header() {
           aria-label={`${SITE.name} — home`}
           onClick={() => setOpen(false)}
         >
-          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-linear-to-br from-primary/10 via-secondary/15 to-primary/5 text-primary shadow-[0_2px_8px_-2px_rgba(23,84,134,0.25)] transition-colors duration-300 group-hover:border-primary/40 group-hover:bg-primary/15">
-            <HeartPulseIcon width={21} height={21} className="transition-transform duration-300 group-hover:scale-110" />
+          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#0284c7]/30 bg-[#f0f7fe] text-[#0284c7] shadow-[0_2px_8px_-2px_rgba(2,132,199,0.25)] transition-colors duration-300 group-hover:border-[#0284c7] group-hover:bg-[#e0f2fe]">
+            {/* Elegant blue intertwined heart line */}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5.5 h-5.5 transition-transform duration-300 group-hover:scale-110">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
             <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-secondary opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-secondary" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#38bdf8] opacity-75" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#0284c7]" />
             </span>
           </div>
 
           <div className="flex flex-col text-left leading-tight">
-            <span className="text-[18px] font-medium tracking-tight text-ink sm:text-[20px]">
+            <span className="font-display-serif text-[17px] font-semibold tracking-wide uppercase text-[#0f2942] sm:text-[19px]">
               {SITE.name}
             </span>
             <div className="flex items-center gap-2 text-[10.5px]">
-              <span className="font-semibold uppercase tracking-wider text-secondary-deep">
+              <span className="font-medium tracking-wider text-[#476882]">
                 {SITE.role}
-              </span>
-              <span className="hidden h-2.5 w-px bg-slate-300 sm:inline" aria-hidden />
-              <span className="hidden text-slate-500 sm:inline font-normal">
-                {SITE.hospital}
               </span>
             </div>
           </div>
         </a>
 
-        {/* Desktop Navigation: Elegant Frosted Pill Capsule */}
+        {/* Desktop Navigation: Elegant Links with Light Blue Underline for Active Section */}
         <nav aria-label="Primary" className="hidden xl:block">
-          <ul className="flex items-center gap-1 rounded-full border border-slate-200/75 bg-slate-100/70 p-1.5 shadow-[inset_0_1px_2px_rgba(16,42,67,0.03)] backdrop-blur-md">
+          <ul className="flex items-center gap-1 rounded-full border border-[#d2e4f3] bg-white/85 p-1.5 shadow-[inset_0_1px_2px_rgba(15,41,66,0.02)] backdrop-blur-md">
             {NAV.map((item) => {
               const isActive = active === item.id;
               return (
@@ -141,15 +140,12 @@ export function Header() {
                   <a
                     href={item.href}
                     aria-current={isActive ? "true" : undefined}
-                    className={`focus-ring relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-all duration-300 ${
+                    className={`focus-ring relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] transition-all duration-300 ${
                       isActive
-                        ? "bg-white text-primary shadow-[0_2px_8px_-2px_rgba(16,42,67,0.12)] font-semibold ring-1 ring-slate-200/80"
-                        : "text-slate-600 hover:bg-white/70 hover:text-ink"
+                        ? "bg-white text-[#175486] font-semibold shadow-[0_2px_8px_-2px_rgba(2,132,199,0.15)] border-b-2 border-[#0284c7]"
+                        : "text-[#476882] font-medium hover:bg-white/70 hover:text-[#0f2942]"
                     }`}
                   >
-                    {isActive && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-secondary" aria-hidden />
-                    )}
                     {item.label}
                   </a>
                 </li>
@@ -163,9 +159,9 @@ export function Header() {
           <a
             href={`tel:${SITE.phone.tel}`}
             aria-label={`Call ${SITE.phone.display}`}
-            className="focus-ring group hidden 2xl:inline-flex items-center gap-2.5 rounded-full border border-slate-200/80 bg-white/70 px-3.5 py-2 text-[12px] font-medium text-slate-700 backdrop-blur-md transition-all duration-300 hover:border-primary/40 hover:bg-white hover:text-primary hover:shadow-xs"
+            className="focus-ring group hidden 2xl:inline-flex items-center gap-2.5 rounded-full border border-[#d2e4f3] bg-white/80 px-3.5 py-2 text-[12px] font-medium text-[#476882] backdrop-blur-md transition-all duration-300 hover:border-[#0284c7] hover:bg-white hover:text-[#0284c7] hover:shadow-xs"
           >
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-mist text-secondary-deep transition-colors duration-300 group-hover:bg-primary group-hover:text-white">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#e0f2fe] text-[#0284c7] transition-colors duration-300 group-hover:bg-[#175486] group-hover:text-white">
               <PhoneIcon width={12} height={12} />
             </span>
             <span className="font-mono text-[11.5px] tracking-tight">{SITE.phone.display}</span>
@@ -174,16 +170,23 @@ export function Header() {
           <a
             href={`tel:${SITE.phone.tel}`}
             aria-label={`Call ${SITE.phone.display}`}
-            className="focus-ring group inline-flex 2xl:hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/70 text-slate-700 backdrop-blur-md transition-all duration-300 hover:border-primary/40 hover:bg-white hover:text-primary hover:shadow-xs"
+            className="focus-ring group inline-flex 2xl:hidden h-10 w-10 items-center justify-center rounded-full border border-[#d2e4f3] bg-white/80 text-[#476882] backdrop-blur-md transition-all duration-300 hover:border-[#0284c7] hover:bg-white hover:text-[#0284c7] hover:shadow-xs"
           >
             <PhoneIcon width={15} height={15} />
           </a>
 
           <a
             href="#contact"
-            className="focus-ring group relative inline-flex h-10.5 items-center gap-2.5 overflow-hidden rounded-full bg-primary px-5.5 text-[12.5px] font-medium tracking-wide text-white shadow-[0_10px_24px_-8px_rgba(23,84,134,0.65)] transition-all duration-300 hover:bg-primary-dark hover:shadow-[0_14px_28px_-6px_rgba(23,84,134,0.75)] active:scale-[0.98]"
+            className="focus-ring group relative inline-flex h-10.5 items-center gap-2.5 rounded-full border border-[#0284c7] bg-[#f0f7fe] px-5 text-[12.5px] font-medium tracking-wide text-[#175486] shadow-[0_2px_10px_rgba(2,132,199,0.15)] transition-all duration-300 hover:bg-[#175486] hover:text-white hover:border-[#175486] hover:shadow-[0_8px_20px_-4px_rgba(23,84,134,0.35)] active:scale-[0.98]"
           >
-            <span>Appointment</span>
+            {/* Calendar / appointment icon */}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="w-4 h-4 transition-colors">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <span>Book a Consultation</span>
             <ArrowRight
               width={13}
               height={13}

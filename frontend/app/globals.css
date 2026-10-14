@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400;1,600&display=swap');
 @import "tailwindcss";
 
 /*
@@ -9,20 +10,20 @@
   --font-serif: var(--font-poppins), 'Poppins', sans-serif;
   --font-display: var(--font-poppins), 'Poppins', sans-serif;
 
-  --color-ink: #102a43; /* typography + navy buttons */
-  --color-primary: #175486;
-  --color-primary-dark: #0f3c61;
-  --color-secondary: #409f9d; /* teal highlight (large text, rules, icons) */
-  --color-secondary-deep: #2e7f7d; /* teal for small text — AA contrast on white */
-  --color-accent: #8dd3ce; /* light aqua, used on dark surfaces */
+  --color-ink: #0f2942; /* deep navy typography */
+  --color-primary: #175486; /* prestigious royal medical blue */
+  --color-primary-dark: #0e385c; /* deep sapphire */
+  --color-secondary: #0284c7; /* vibrant medical blue */
+  --color-secondary-deep: #0369a1; /* dark sky blue for AA contrast */
+  --color-accent: #38bdf8; /* bright light blue */
 
   --color-surface: #ffffff;
-  --color-offwhite: #f5f8fa;
-  --color-mist: #eaf6f5; /* aqua tint */
-  --color-navy: #0b2239; /* deep navy sections + footer */
-  --color-navy-2: #0f2d4a;
-  --color-slate: #486581; /* secondary text (same family as #102A43) */
-  --color-line: #d9e2ec;
+  --color-offwhite: #f3f8fd; /* soft light blue tint */
+  --color-mist: #e8f3fb; /* light ice blue */
+  --color-navy: #091e32; /* deep navy sections */
+  --color-navy-2: #0e2b46;
+  --color-slate: #476882; /* secondary slate text */
+  --color-line: #d2e4f3; /* delicate light blue border */
 }
 
 :root {
@@ -32,7 +33,7 @@
 *,
 *::before,
 *::after {
-  font-family: var(--font-poppins), 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-poppins), 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
 
 html,
@@ -66,6 +67,11 @@ h6 {
   font-family: var(--font-poppins), 'Poppins', sans-serif !important;
 }
 
+.font-display-serif,
+.font-display-serif * {
+  font-family: 'Playfair Display', Georgia, serif !important;
+}
+
 /* ---------- Elegance polish ---------- */
 h1,
 h2,
@@ -78,7 +84,7 @@ dd {
 }
 html {
   scrollbar-width: thin;
-  scrollbar-color: rgba(64, 159, 157, 0.55) transparent;
+  scrollbar-color: rgba(2, 132, 199, 0.55) transparent;
 }
 ::-webkit-scrollbar {
   width: 9px;
@@ -88,7 +94,7 @@ html {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #8dd3ce, #409f9d);
+  background: linear-gradient(180deg, #38bdf8, #0284c7);
   border-radius: 999px;
   border: 2px solid #fff;
 }
@@ -98,7 +104,7 @@ section[id] {
 }
 
 ::selection {
-  background: rgba(64, 159, 157, 0.25);
+  background: rgba(2, 132, 199, 0.22);
 }
 
 @media (prefers-reduced-motion: reduce) {

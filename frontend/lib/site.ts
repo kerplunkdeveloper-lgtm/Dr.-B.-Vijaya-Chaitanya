@@ -39,7 +39,7 @@ export const DESCRIPTION =
 export const NAV = [
   { label: "Home", href: "#home", id: "home" },
   { label: "About", href: "#about", id: "about" },
-  { label: "Expertise", href: "#expertise", id: "expertise" },
+  { label: "Clinical Expertise", href: "#expertise", id: "expertise" },
   { label: "Experience", href: "#experience", id: "experience" },
   { label: "Journey", href: "#journey", id: "journey" },
   { label: "FAQ", href: "#faq", id: "faq" },
