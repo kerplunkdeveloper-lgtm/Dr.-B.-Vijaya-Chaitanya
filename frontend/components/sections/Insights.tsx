@@ -56,7 +56,7 @@ export function Insights() {
 
       <div className="container-x relative z-10 grid gap-10 md:grid-cols-2 md:items-center lg:gap-14">
         {/* Left Content */}
-        <div className="flex max-w-xl flex-col justify-center font-sans">
+        <div className="flex max-w-xl flex-col justify-center">
           <Reveal>
             <div className="mb-4 flex items-center gap-3">
               <span className="text-[12px] font-semibold tracking-[0.2em] text-[#0066cc] uppercase">
@@ -67,7 +67,7 @@ export function Insights() {
           </Reveal>
 
           <Reveal delay={100}>
-            <h2 className="mb-4 font-serif text-[clamp(2.2rem,3.8vw,2.9rem)] font-medium leading-[1.18] text-[#051126]">
+            <h2 className="mb-4 text-[clamp(2.2rem,3.8vw,2.9rem)] font-semibold leading-[1.18] text-[#051126]">
               The <span className="text-[#0066cc]">Cardiologist&apos;s</span> View
             </h2>
           </Reveal>

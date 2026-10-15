@@ -188,7 +188,7 @@ export function Preloader() {
         </div>
 
         <div>
-          <p className="font-serif text-[22px] font-light tracking-[-0.01em] sm:text-[26px]">{SITE.name}</p>
+          <p className="text-[22px] font-medium tracking-tight sm:text-[26px]">{SITE.name}</p>
           <p className="mt-2 text-[10.5px] font-medium uppercase tracking-[0.34em] text-accent">{SITE.role}</p>
         </div>
 

@@ -157,8 +157,8 @@ export function FAQ() {
 
                     {/* Question text */}
                     <h3
-                      className={`font-serif text-[16.5px] sm:text-[18px] leading-[1.35] transition-colors duration-300 ${
-                        isOpen ? "font-normal text-primary" : "font-light text-ink group-hover:text-primary"
+                      className={`text-[16px] sm:text-[17.5px] font-medium leading-[1.4] transition-colors duration-300 ${
+                        isOpen ? "text-primary font-semibold" : "text-ink group-hover:text-primary"
                       }`}
                     >
                       {faq.question}

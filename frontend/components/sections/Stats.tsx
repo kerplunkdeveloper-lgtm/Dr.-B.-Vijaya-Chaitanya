@@ -10,7 +10,7 @@ export function Stats() {
       id="experience"
       data-nav="experience"
       aria-labelledby="experience-title"
-      className="relative isolate overflow-hidden bg-navy pb-32 pt-20 text-white md:pt-24 lg:pb-44 lg:pt-28"
+      className="relative isolate overflow-hidden bg-navy py-16 md:py-20 lg:py-24 text-white"
     >
       <div
         aria-hidden
@@ -49,7 +49,7 @@ export function Stats() {
               delay={i * 70}
               className="flex items-baseline justify-between gap-6 border-b border-white/10 py-5 last:border-b-0 lg:flex-col lg:items-center lg:justify-start lg:gap-0 lg:border-b-0 lg:px-4 lg:py-3"
             >
-              <dd className="font-serif text-[clamp(2.1rem,3.6vw,3.6rem)] font-light leading-none tracking-[-0.035em] text-white filter-[drop-shadow(0_0_22px_rgba(141,211,206,0.32))]">
+              <dd className="text-[clamp(2.1rem,3.6vw,3.6rem)] font-semibold leading-none tracking-tight text-white filter-[drop-shadow(0_0_22px_rgba(141,211,206,0.32))]">
                 <Odometer value={s.value} />
               </dd>
               <span aria-hidden className="mt-5 hidden h-0.5 w-7 rounded-full bg-secondary lg:block" />

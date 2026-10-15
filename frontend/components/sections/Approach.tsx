@@ -18,10 +18,10 @@ export function Approach() {
       
 
       {/* Top Heading & Subtitle */}
-      <div className="container-x mx-auto max-w-6xl text-center">
+      <div className="container-x mx-auto max-w-5xl text-center">
         <h2
           id="simulator-title"
-          className="font-sans font-black tracking-tight text-3xl sm:text-4xl lg:text-[44px] leading-[1.12] text-[#0f233a] uppercase"
+          className="font-bold tracking-tight text-3xl sm:text-4xl lg:text-[42px] leading-[1.18] text-[#0f233a] uppercase"
         >
           3D Cardiac Vasculature &amp;{" "}
           <span className="block text-[#dc2626]">Interventional Simulator</span>

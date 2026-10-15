@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { HERO_STATS, SITE } from "@/lib/site";
+import { SITE } from "@/lib/site";
 import { BuildingHeartIcon, HeartPulseIcon } from "../icons";
 import { IntroVideo } from "../IntroVideo";
 import { ButtonLink } from "../ui";
@@ -110,21 +110,6 @@ export function Hero() {
                 Scroll
               </a>
             </div>
-
-            {/* mobile / tablet: quick stats strip */}
-            <dl
-              data-hero="cta"
-              className="relative z-20 mt-9 grid grid-cols-3 divide-x divide-line rounded-2xl border border-line bg-white py-5 text-center shadow-[0_18px_40px_-26px_rgba(16,42,67,0.35)] lg:hidden"
-            >
-              {HERO_STATS.map((s) => (
-                <div key={s.label} className="px-2">
-                  <dd className="font-serif text-[18px] font-light leading-none text-ink sm:text-2xl">
-                    {s.value}
-                  </dd>
-                  <dt className="mt-2 text-[10.5px] font-light leading-tight text-slate">{s.label}</dt>
-                </div>
-              ))}
-            </dl>
           </div>
         </div>
       </section>

@@ -53,9 +53,9 @@ export function Contact() {
               <h2
                 id="contact-title"
                 data-g="split"
-                className="display mt-6 text-2xl  text-ink"
+                className="mt-6 text-[clamp(1.35rem,2.2vw,1.75rem)] font-semibold leading-[1.35] text-ink"
               >
-              If you are dealing with a cardiovascular condition, considering an intervention or looking for a specialist opinion, understanding the problem clearly is the first step.
+                If you are dealing with a cardiovascular condition, considering an intervention or looking for a specialist opinion, understanding the problem clearly is the first step.
               </h2>
               <p className="mt-5 text-[14.5px] font-light leading-[1.9] text-slate">
                 Consult with {SITE.name} for expert cardiac care.

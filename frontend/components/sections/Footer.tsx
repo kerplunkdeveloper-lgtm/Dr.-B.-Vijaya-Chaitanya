@@ -1,8 +1,7 @@
 import { NAV, SITE, SOCIALS } from "@/lib/site";
-import { FacebookIcon, InstagramIcon, LinkedInIcon, YoutubeIcon } from "../icons";
+import { FacebookIcon, InstagramIcon, YoutubeIcon } from "../icons";
 
 const socialIcons = {
-  linkedin: LinkedInIcon,
   instagram: InstagramIcon,
   facebook: FacebookIcon,
   youtube: YoutubeIcon,
@@ -16,7 +15,7 @@ export function Footer() {
       <div className="container-x py-12 lg:py-14">
         <div className="flex flex-col items-center gap-8 lg:flex-row lg:justify-between">
           <div className="text-center leading-tight lg:text-left">
-            <p className="font-serif text-[22px] text-white">{SITE.name}</p>
+            <p className="text-[22px] font-semibold tracking-wide text-white">{SITE.name}</p>
             <p className="mt-1.5 text-[12px] font-light text-white/60">{SITE.role}</p>
           </div>
 

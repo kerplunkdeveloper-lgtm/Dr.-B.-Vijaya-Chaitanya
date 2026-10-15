@@ -1461,7 +1461,7 @@ export function Heart3D({ className = "", children }: { className?: string; chil
                 <span className="text-[11px] font-bold tracking-wider uppercase">
                   AI Deep Learning: CardioVision-ResNet (v5.2)
                 </span>
-                <span className="rounded bg-cyan-950 px-1.5 py-0.5 text-[9.5px] font-mono text-cyan-400 border border-cyan-800">
+                <span className="rounded bg-cyan-950 px-1.5 py-0.5 text-[9.5px] font-medium text-cyan-400 border border-cyan-800">
                   Inference: 12ms · 60 FPS
                 </span>
               </div>
@@ -1524,7 +1524,7 @@ export function Heart3D({ className = "", children }: { className?: string; chil
 
             {/* Bottom Cybernetic Sweep Status */}
             <div className="flex items-center justify-center">
-              <span className="rounded-full border border-cyan-400/50 bg-slate-950/90 px-4 py-1 text-[10.5px] font-mono tracking-wider text-cyan-300 shadow-md">
+              <span className="rounded-full border border-cyan-400/50 bg-slate-950/90 px-4 py-1 text-[10.5px] font-medium tracking-wider text-cyan-300 shadow-md">
                 3D VOXEL CLOUD RECONSTRUCTION · 60 FPS REAL-TIME SYNC
               </span>
             </div>

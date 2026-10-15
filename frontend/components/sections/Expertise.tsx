@@ -56,7 +56,7 @@ export function Expertise() {
             <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4">
               <h2
                 id="expertise-heading"
-                className="font-display-serif text-[38px] sm:text-[50px] lg:text-[60px] leading-none tracking-tight font-bold inline-flex items-center gap-x-3"
+                className="text-[38px] sm:text-[50px] lg:text-[60px] leading-none tracking-tight font-bold inline-flex items-center gap-x-3"
               >
                 <span className="text-[#0f2942] font-bold">
                   Clinical
@@ -79,7 +79,7 @@ export function Expertise() {
           {/* Far Right Stacked Mottos */}
           <div
             aria-hidden="true"
-            className="hidden lg:flex flex-col text-right font-sans text-[10px] sm:text-[10.5px] tracking-[0.25em] text-[#7095b2] font-medium leading-[2.1] uppercase shrink-0 pb-1"
+            className="hidden lg:flex flex-col text-right text-[10px] sm:text-[10.5px] tracking-[0.25em] text-[#7095b2] font-medium leading-[2.1] uppercase shrink-0 pb-1"
           >
             <span>PRECISION</span>
             <span>EXPERIENCE</span>
@@ -102,14 +102,16 @@ export function Expertise() {
 
         {/* ========================================================= */}
         {/* ROW 5: 2 CARDS CENTERED HORIZONTALLY (13 & 14)             */}
+        {/* Perfectly matches the width of the 3-column cards above    */}
         {/* ========================================================= */}
-        <div className="mt-5 lg:mt-6 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6">
+        <div className="mt-5 lg:mt-6 flex flex-wrap justify-center gap-5 lg:gap-6">
           {lastTwo.map((proc) => (
-            <ProcedureCard
-              key={proc.id}
-              procedure={proc}
-              onSelect={() => setSelected(proc)}
-            />
+            <div key={proc.id} className="w-full md:w-[calc(50%-10px)] lg:w-[calc((100%-48px)/3)]">
+              <ProcedureCard
+                procedure={proc}
+                onSelect={() => setSelected(proc)}
+              />
+            </div>
           ))}
         </div>
       </div>
@@ -152,7 +154,7 @@ export function Expertise() {
                   <ProcedureIcon id={selected.id} className="w-5 h-5" />
                 </span>
                 <div>
-                  <span className="text-[12px] font-mono tracking-wider uppercase text-[#0284c7] font-semibold">
+                  <span className="text-[12px] tracking-wider uppercase text-[#0284c7] font-semibold">
                     Procedure {selected.number}
                   </span>
                   <p className="text-[11px] text-[#7095b2] uppercase tracking-wider font-medium">
@@ -164,7 +166,7 @@ export function Expertise() {
               {/* Title */}
               <h3
                 id="modal-title"
-                className="font-display-serif text-2xl sm:text-3xl font-semibold text-[#0f2942] mt-3 leading-snug"
+                className="text-2xl sm:text-3xl font-semibold text-[#0f2942] mt-3 leading-snug"
               >
                 {selected.title}
               </h3>
@@ -172,7 +174,7 @@ export function Expertise() {
 
             {/* Modal Body: Full In-depth Clinical Content */}
             <div className="p-6 sm:p-8 overflow-y-auto space-y-4 text-[14.5px] leading-relaxed text-[#33536d]">
-              <h4 className="font-display-serif text-lg sm:text-xl font-semibold text-[#0f2942]">
+              <h4 className="text-lg sm:text-xl font-semibold text-[#0f2942]">
                 {selected.articleTitle}
               </h4>
 
@@ -235,10 +237,10 @@ function ProcedureCard({
 
           {/* Number & Procedure Title */}
           <div className="flex flex-col">
-            <span className="text-[12px] sm:text-[13px] font-mono text-[#0284c7] font-semibold tracking-wider mb-1 leading-none">
+            <span className="text-[12px] sm:text-[13px] text-[#0284c7] font-semibold tracking-wider mb-1 leading-none">
               {procedure.number}
             </span>
-            <h3 className="font-display-serif text-[17px] sm:text-[18px] font-semibold text-[#0f2942] leading-[1.3] group-hover:text-[#0284c7] transition-colors">
+            <h3 className="text-[17px] sm:text-[18px] font-semibold text-[#0f2942] leading-[1.3] group-hover:text-[#0284c7] transition-colors">
               {procedure.title}
             </h3>
           </div>

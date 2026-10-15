@@ -38,9 +38,9 @@ export const DESCRIPTION =
 
 export const NAV = [
   { label: "Home", href: "#home", id: "home" },
-  { label: "About", href: "#about", id: "about" },
-  { label: "Clinical Expertise", href: "#expertise", id: "expertise" },
   { label: "Experience", href: "#experience", id: "experience" },
+  { label: "Clinical Expertise", href: "#expertise", id: "expertise" },
+  { label: "About", href: "#about", id: "about" },
   { label: "Journey", href: "#journey", id: "journey" },
   { label: "FAQ", href: "#faq", id: "faq" },
   { label: "Contact", href: "#contact", id: "contact" },
@@ -134,10 +134,9 @@ export const AWARDS = [
 ] as const;
 
 export const SOCIALS = [
-  { name: "LinkedIn", href: "https://www.linkedin.com/", icon: "linkedin" },
-  { name: "Instagram", href: "https://www.instagram.com/", icon: "instagram" },
-  { name: "Facebook", href: "https://www.facebook.com/", icon: "facebook" },
-  { name: "YouTube", href: "https://www.youtube.com/", icon: "youtube" },
+  { name: "Instagram", href: "https://www.instagram.com/medstarhospitalsofficial/", icon: "instagram" },
+  { name: "Facebook", href: "https://www.facebook.com/medstarhospitalstadepalli/", icon: "facebook" },
+  { name: "YouTube", href: "https://www.youtube.com/@medstar_hospitals", icon: "youtube" },
 ] as const;
 
 export const SHOWCASE = [

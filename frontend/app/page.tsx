@@ -1,7 +1,6 @@
 import { Header } from "@/components/Header";
 import { JsonLd } from "@/components/JsonLd";
 import { About } from "@/components/sections/About";
-import { Approach } from "@/components/sections/Approach";
 import { Awards } from "@/components/sections/Awards";
 import { Contact } from "@/components/sections/Contact";
 import { Expertise } from "@/components/sections/Expertise";
@@ -11,6 +10,7 @@ import { Journey } from "@/components/sections/Journey";
 import { Leadership } from "@/components/sections/Leadership";
 
 import { Insights } from "@/components/sections/Insights";
+import { HeartbeatExperience } from "@/components/sections/HeartbeatExperience";
 import { FAQ } from "@/components/sections/FAQ";
 import { Motion } from "@/components/Motion";
 import { MobileCta } from "@/components/MobileCta";
@@ -24,24 +24,22 @@ export default function Home() {
       <Header />
       <main id="main">
         <Hero />
-           <Stats />
-      
-     
+        <Stats />
         <Expertise />
         <About />
-       
         <Journey />
         <Awards />
         <Leadership />
-        <Insights />  
-        <Approach />
+        <Insights />
+        <HeartbeatExperience />
+     
         <FAQ />
         <Contact />
       </main>
       <Footer />
       <MobileCta />
       <FloatingActions />
-      <Motion />  
+      <Motion />
     </>
   );
 }

@@ -20,7 +20,7 @@ export function Leadership() {
         className="absolute inset-0 -z-10 bg-[radial-gradient(50%_60%_at_85%_15%,rgba(141,211,206,0.28),transparent_70%)]"
       />
 
-      <div className="container-x grid items-center gap-10 pt-16 lg:min-h-[560px] lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-8 lg:py-0">
+      <div className="container-x grid items-center gap-10 pt-16 pb-12 sm:pb-16 lg:min-h-[560px] lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-8 lg:py-0">
         <Reveal className="lg:max-w-[470px] lg:py-20">
           <p className="eyebrow !text-accent">Leadership</p>
           <span className="rule mt-4" aria-hidden />
